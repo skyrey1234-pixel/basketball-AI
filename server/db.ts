@@ -1,6 +1,17 @@
-import { eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import {
+  InsertUser,
+  users,
+  gameSessions,
+  InsertGameSession,
+  scoutingReports,
+  InsertScoutingReport,
+  playerProfiles,
+  InsertPlayerProfile,
+  filmAnnotations,
+  gamePlans,
+} from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +100,101 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// ===== Game Sessions =====
+export async function listSessions(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(gameSessions).where(eq(gameSessions.userId, userId)).orderBy(desc(gameSessions.createdAt));
+}
+
+export async function getSession(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select().from(gameSessions).where(eq(gameSessions.id, id)).limit(1);
+  return rows[0];
+}
+
+export async function createSession(data: InsertGameSession) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(gameSessions).values(data);
+  return Number(result[0].insertId);
+}
+
+export async function updateSessionStatus(id: number, status: "analyzing" | "complete" | "failed") {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(gameSessions).set({ status }).where(eq(gameSessions.id, id));
+}
+
+export async function deleteSession(id: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(scoutingReports).where(eq(scoutingReports.sessionId, id));
+  await db.delete(playerProfiles).where(eq(playerProfiles.sessionId, id));
+  await db.delete(filmAnnotations).where(eq(filmAnnotations.sessionId, id));
+  await db.delete(gamePlans).where(eq(gamePlans.sessionId, id));
+  await db.delete(gameSessions).where(eq(gameSessions.id, id));
+}
+
+// ===== Scouting Reports =====
+export async function getReportBySession(sessionId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select().from(scoutingReports).where(eq(scoutingReports.sessionId, sessionId)).orderBy(desc(scoutingReports.createdAt)).limit(1);
+  return rows[0];
+}
+
+export async function saveReport(data: InsertScoutingReport) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(scoutingReports).where(eq(scoutingReports.sessionId, data.sessionId));
+  await db.insert(scoutingReports).values(data);
+}
+
+// ===== Player Profiles =====
+export async function listPlayersBySession(sessionId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(playerProfiles).where(eq(playerProfiles.sessionId, sessionId));
+}
+
+export async function savePlayerProfiles(sessionId: number, profiles: InsertPlayerProfile[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(playerProfiles).where(eq(playerProfiles.sessionId, sessionId));
+  if (profiles.length > 0) await db.insert(playerProfiles).values(profiles);
+}
+
+// ===== Film Annotations (cache) =====
+export async function getAnnotation(sessionId: number, highlightIndex: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db
+    .select()
+    .from(filmAnnotations)
+    .where(and(eq(filmAnnotations.sessionId, sessionId), eq(filmAnnotations.highlightIndex, highlightIndex)))
+    .limit(1);
+  return rows[0];
+}
+
+export async function saveAnnotation(sessionId: number, highlightIndex: number, annotation: unknown) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(filmAnnotations).values({ sessionId, highlightIndex, annotation });
+}
+
+// ===== Game Plans (cache) =====
+export async function getGamePlan(sessionId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select().from(gamePlans).where(eq(gamePlans.sessionId, sessionId)).orderBy(desc(gamePlans.createdAt)).limit(1);
+  return rows[0];
+}
+
+export async function saveGamePlan(sessionId: number, plan: unknown) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(gamePlans).where(eq(gamePlans.sessionId, sessionId));
+  await db.insert(gamePlans).values({ sessionId, plan });
+}
