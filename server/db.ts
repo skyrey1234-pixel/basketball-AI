@@ -11,6 +11,7 @@ import {
   InsertPlayerProfile,
   filmAnnotations,
   gamePlans,
+  timeMachineSessions,
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -134,6 +135,11 @@ export async function deleteSession(id: number) {
   await db.delete(playerProfiles).where(eq(playerProfiles.sessionId, id));
   await db.delete(filmAnnotations).where(eq(filmAnnotations.sessionId, id));
   await db.delete(gamePlans).where(eq(gamePlans.sessionId, id));
+  try {
+    await db.delete(timeMachineSessions).where(eq(timeMachineSessions.sessionId, id));
+  } catch {
+    // table may not exist yet if the migration has not been applied
+  }
   await db.delete(gameSessions).where(eq(gameSessions.id, id));
 }
 
@@ -197,4 +203,35 @@ export async function saveGamePlan(sessionId: number, plan: unknown) {
   if (!db) throw new Error("Database not available");
   await db.delete(gamePlans).where(eq(gamePlans.sessionId, sessionId));
   await db.insert(gamePlans).values({ sessionId, plan });
+}
+
+// ===== Time Machine (cache) =====
+// Best-effort: if the migration adding time_machine_sessions has not run yet,
+// reads return undefined and writes are swallowed so the feature still works
+// on-demand (generate returns fresh possessions; they just aren't persisted).
+export async function getTimeMachine(sessionId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  try {
+    const rows = await db
+      .select()
+      .from(timeMachineSessions)
+      .where(eq(timeMachineSessions.sessionId, sessionId))
+      .orderBy(desc(timeMachineSessions.createdAt))
+      .limit(1);
+    return rows[0];
+  } catch {
+    return undefined;
+  }
+}
+
+export async function saveTimeMachine(sessionId: number, possessions: unknown) {
+  const db = await getDb();
+  if (!db) return;
+  try {
+    await db.delete(timeMachineSessions).where(eq(timeMachineSessions.sessionId, sessionId));
+    await db.insert(timeMachineSessions).values({ sessionId, possessions });
+  } catch {
+    // table missing — skip persistence, generation still returns results
+  }
 }

@@ -65,6 +65,14 @@ export interface Possession {
   lesson: string;
   /** Point swing you left on the table, e.g. "+1.2 pts / poss". */
   valueLeft: string;
+  /** Seconds into the source film where this possession happens, if known. */
+  timestampSeconds?: number | null;
+}
+
+/** Format seconds as m:ss for display. */
+export function fmtClock(seconds: number): string {
+  const s = Math.max(0, Math.round(seconds));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 }
 
 // Helper: mirror a spot horizontally around center court (x=50).

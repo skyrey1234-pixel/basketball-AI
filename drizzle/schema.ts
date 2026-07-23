@@ -111,3 +111,16 @@ export const gamePlans = mysqlTable("game_plans", {
 });
 
 export type GamePlan = typeof gamePlans.$inferSelect;
+
+/**
+ * Cached AI Time-Machine possessions per session — a JSON array of possession
+ * specs the client turns into a walk-around 3D replay.
+ */
+export const timeMachineSessions = mysqlTable("time_machine_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionId: int("sessionId").notNull(),
+  possessions: json("possessions"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type TimeMachineSession = typeof timeMachineSessions.$inferSelect;

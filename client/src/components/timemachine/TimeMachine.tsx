@@ -5,12 +5,26 @@ import {
   toTop,
   lerp,
   easeOut,
+  fmtClock,
   type Possession,
   type PlayerLabel,
   type PossessionPlayer,
   type DefenderPos,
 } from "./possessionData";
-import { Eye, Grid3x3, RotateCcw, Play, Lightbulb, Sparkles } from "lucide-react";
+import { buildPossessions } from "./possessionBuilder";
+import type { PossessionSpec } from "@shared/timeMachine";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
+import { Eye, Grid3x3, RotateCcw, Play, Lightbulb, Sparkles, Loader2, RefreshCw, Film, Box, Clapperboard } from "lucide-react";
+
+interface TimeMachineProps {
+  /** When provided, relives this session's AI-reconstructed possessions. */
+  sessionId?: number;
+  opponentName?: string;
+  /** Source film, so a possession can flip to the real video frame. */
+  youtubeVideoId?: string | null;
+  videoUrl?: string | null;
+}
 
 /**
  * Time-Machine — "stand inside the possession".
@@ -29,11 +43,38 @@ const EYE_TILT = 58; // degrees of rotateX at eye level
 const RUN_MS = 2600;
 const PASS_MS = 850;
 
-export default function TimeMachine() {
+export default function TimeMachine({ sessionId, opponentName, youtubeVideoId, videoUrl }: TimeMachineProps = {}) {
+  const utils = trpc.useUtils();
+  const { data: specs, isLoading } = trpc.timeMachine.get.useQuery(
+    { sessionId: sessionId! },
+    { enabled: typeof sessionId === "number" }
+  );
+
+  const generate = trpc.timeMachine.generate.useMutation({
+    onSuccess: () => {
+      utils.timeMachine.get.invalidate({ sessionId: sessionId! });
+      toast.success("Possessions reconstructed from the film");
+    },
+    onError: e => toast.error(e.message),
+  });
+
+  // Build real possessions from the AI spec; fall back to the sample set.
+  const live = useMemo(() => {
+    const arr = (specs as PossessionSpec[] | null | undefined) ?? [];
+    return Array.isArray(arr) && arr.length > 0 ? buildPossessions(arr) : [];
+  }, [specs]);
+
+  const usingLive = live.length > 0;
+  const possessions = usingLive ? live : POSSESSIONS;
+
   const [idx, setIdx] = useState(0);
-  const possession = POSSESSIONS[idx];
+  useEffect(() => {
+    setIdx(0);
+  }, [usingLive]);
+  const possession = possessions[Math.min(idx, possessions.length - 1)];
 
   const [eyeLevel, setEyeLevel] = useState(true);
+  const [mode, setMode] = useState<"relive" | "film">("relive");
   const [phase, setPhase] = useState<Phase>("ready");
   const [progress, setProgress] = useState(0); // 0..1 possession run
   const [passT, setPassT] = useState(0); // 0..1 ball travel on best read
@@ -112,11 +153,51 @@ export default function TimeMachine() {
   const showReads = phase === "revealed";
   const showActual = phase === "decision" || phase === "revealed";
 
+  // Film linkage: a possession can flip to the real video frame at its timestamp.
+  const clipSeconds = typeof possession.timestampSeconds === "number" ? possession.timestampSeconds : null;
+  const hasClip = clipSeconds !== null && !!(youtubeVideoId || videoUrl);
+  useEffect(() => {
+    if (!hasClip) setMode("relive");
+  }, [hasClip, possession.id]);
+
   return (
     <div className="space-y-4">
+      {/* Film source bar */}
+      {typeof sessionId === "number" && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-secondary/40 px-3 py-2">
+          <div className="flex items-center gap-2 text-xs">
+            <Film className={`h-4 w-4 ${usingLive ? "text-green-400" : "text-muted-foreground"}`} />
+            {usingLive ? (
+              <span className="text-foreground">
+                Reliving <span className="font-semibold">{possessions.length}</span> possession
+                {possessions.length > 1 ? "s" : ""} reconstructed from{opponentName ? ` the ${opponentName}` : " this"} film
+              </span>
+            ) : (
+              <span className="text-muted-foreground">
+                Showing example possessions — generate to relive the reads from this game's film.
+              </span>
+            )}
+          </div>
+          <button
+            onClick={() => generate.mutate({ sessionId })}
+            disabled={generate.isPending || isLoading}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-[#FF7A1A] text-black hover:bg-[#ff8c3a] transition-colors disabled:opacity-60"
+          >
+            {generate.isPending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : usingLive ? (
+              <RefreshCw className="h-3.5 w-3.5" />
+            ) : (
+              <Sparkles className="h-3.5 w-3.5" />
+            )}
+            {generate.isPending ? "Reconstructing…" : usingLive ? "Regenerate" : "Generate from film"}
+          </button>
+        </div>
+      )}
+
       {/* Scenario selector */}
       <div className="flex flex-wrap items-center gap-2">
-        {POSSESSIONS.map((p, i) => (
+        {possessions.map((p, i) => (
           <button
             key={p.id}
             onClick={() => setIdx(i)}
@@ -141,27 +222,60 @@ export default function TimeMachine() {
             {possession.set} · {possession.playType} · vs {possession.defenseScheme}
           </p>
         </div>
-        <div className="flex items-center gap-1 rounded-lg bg-secondary border border-border p-1">
-          <button
-            onClick={() => setEyeLevel(true)}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-              eyeLevel ? "bg-[#FF7A1A] text-black" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <Eye className="h-3.5 w-3.5" /> Eye Level
-          </button>
-          <button
-            onClick={() => setEyeLevel(false)}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-              !eyeLevel ? "bg-[#FF7A1A] text-black" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <Grid3x3 className="h-3.5 w-3.5" /> Bird's Eye
-          </button>
+        <div className="flex items-center gap-2">
+          {/* Relive vs. real film */}
+          {hasClip && (
+            <div className="flex items-center gap-1 rounded-lg bg-secondary border border-border p-1">
+              <button
+                onClick={() => setMode("relive")}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                  mode === "relive" ? "bg-[#FF7A1A] text-black" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Box className="h-3.5 w-3.5" /> 3D Relive
+              </button>
+              <button
+                onClick={() => setMode("film")}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                  mode === "film" ? "bg-[#FF7A1A] text-black" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Clapperboard className="h-3.5 w-3.5" /> Film {clipSeconds !== null ? `· ${fmtClock(clipSeconds)}` : ""}
+              </button>
+            </div>
+          )}
+
+          {/* Camera view (only meaningful in the 3D relive) */}
+          {mode === "relive" && (
+            <div className="flex items-center gap-1 rounded-lg bg-secondary border border-border p-1">
+              <button
+                onClick={() => setEyeLevel(true)}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                  eyeLevel ? "bg-[#FF7A1A] text-black" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Eye className="h-3.5 w-3.5" /> Eye Level
+              </button>
+              <button
+                onClick={() => setEyeLevel(false)}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                  !eyeLevel ? "bg-[#FF7A1A] text-black" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Grid3x3 className="h-3.5 w-3.5" /> Bird's Eye
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
+      {/* Real film frame — flip to the actual video at this possession's timestamp */}
+      {mode === "film" && hasClip && (
+        <FilmPanel youtubeVideoId={youtubeVideoId} videoUrl={videoUrl} seconds={clipSeconds ?? 0} />
+      )}
+
       {/* 3D court stage */}
+      {mode === "relive" && (
       <div
         className="relative w-full rounded-xl overflow-hidden border border-border"
         style={{
@@ -273,8 +387,10 @@ export default function TimeMachine() {
           </div>
         )}
       </div>
+      )}
 
       {/* Controls */}
+      {mode === "relive" && (
       <div className="flex flex-wrap items-center gap-2">
         {phase === "ready" && (
           <button
@@ -316,6 +432,7 @@ export default function TimeMachine() {
           </div>
         )}
       </div>
+      )}
 
       {/* Read comparison + lesson */}
       {(phase === "decision" || phase === "revealed") && (
@@ -381,6 +498,48 @@ export default function TimeMachine() {
 }
 
 /* ============================ Sub-components ============================ */
+
+/** The real film frame, seeked to this possession's timestamp. */
+function FilmPanel({
+  youtubeVideoId,
+  videoUrl,
+  seconds,
+}: {
+  youtubeVideoId?: string | null;
+  videoUrl?: string | null;
+  seconds: number;
+}) {
+  const start = Math.max(0, Math.floor(seconds));
+  return (
+    <div className="relative w-full rounded-xl overflow-hidden border border-border bg-black" style={{ aspectRatio: "16 / 9" }}>
+      <div className="absolute top-3 left-3 z-10 text-[10px] font-mono text-white/80 bg-black/50 rounded px-2 py-1 backdrop-blur">
+        ▶ ACTUAL FILM · {fmtClock(start)}
+      </div>
+      {youtubeVideoId ? (
+        <iframe
+          key={`${youtubeVideoId}-${start}`}
+          className="absolute inset-0 w-full h-full"
+          src={`https://www.youtube-nocookie.com/embed/${youtubeVideoId}?start=${start}&rel=0`}
+          title="Possession film"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      ) : videoUrl ? (
+        <video
+          key={`${videoUrl}-${start}`}
+          className="absolute inset-0 w-full h-full"
+          src={`${videoUrl}#t=${start}`}
+          controls
+          playsInline
+          onLoadedMetadata={e => {
+            const v = e.currentTarget;
+            if (Number.isFinite(v.duration) && start < v.duration) v.currentTime = start;
+          }}
+        />
+      ) : null}
+    </div>
+  );
+}
 
 /** Static half-court floor lines (top-down, hoop at top). */
 function CourtFloor() {
