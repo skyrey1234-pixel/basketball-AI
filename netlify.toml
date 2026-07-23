@@ -1,0 +1,34 @@
+[build]
+  command = "npm run build"
+  publish = "dist/public"
+
+# `netlify dev` should serve the built static output and functions directly
+# (matching the production topology) rather than trying to detect a framework
+# dev server. The app's own hot-reloading dev server is `npm run dev`.
+[dev]
+  framework = "#static"
+  publish = "dist/public"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# API + server routes are handled by the Express app running inside a function.
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/manus-storage/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+  force = true
+
+# SPA fallback: any request that isn't a real static asset serves index.html
+# so the client-side router (wouter) can handle the route.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
