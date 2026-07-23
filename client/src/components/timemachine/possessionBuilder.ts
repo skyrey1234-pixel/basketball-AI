@@ -159,6 +159,7 @@ export function buildPossessionFromSpec(spec: PossessionSpec): Possession {
     narration: spec.narration,
     lesson: spec.lesson,
     valueLeft: spec.valueLeft,
+    timestampSeconds: spec.timestampSeconds ?? null,
   };
 }
 

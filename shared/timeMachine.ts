@@ -67,4 +67,6 @@ export interface PossessionSpec {
   lesson: string;
   /** Points left on the table, e.g. "+0.9 pts / possession". */
   valueLeft: string;
+  /** Seconds into the film where this possession occurs (from the seed highlight), or null if unknown. */
+  timestampSeconds: number | null;
 }

@@ -172,7 +172,12 @@ export default function SessionPage() {
                   red, the better read in green.
                 </p>
               </div>
-              <TimeMachine sessionId={sessionId} opponentName={session.opponentName} />
+              <TimeMachine
+                sessionId={sessionId}
+                opponentName={session.opponentName}
+                youtubeVideoId={session.youtubeVideoId}
+                videoUrl={session.videoUrl}
+              />
             </TabsContent>
           </Tabs>
         )}

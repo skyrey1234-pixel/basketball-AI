@@ -32,6 +32,10 @@ const POSSESSION_SCHEMA = {
     narration: { type: "string", description: "One line shown at the freeze, before the reveal" },
     lesson: { type: "string", description: "Coaching takeaway after the reveal" },
     valueLeft: { type: "string", description: "Points left on the table, e.g. '+0.9 pts / possession'" },
+    timestampSeconds: {
+      type: ["integer", "null"],
+      description: "Seconds into the film where this possession occurs. Copy the timestamp of the seed decision moment when one is given; otherwise null.",
+    },
   },
   required: [
     "id",
@@ -46,6 +50,7 @@ const POSSESSION_SCHEMA = {
     "narration",
     "lesson",
     "valueLeft",
+    "timestampSeconds",
   ],
   additionalProperties: false,
 };
@@ -65,7 +70,7 @@ const TIME_MACHINE_SCHEMA = {
   additionalProperties: false,
 };
 
-type Highlight = { title?: string; note?: string; category?: string; verdict?: string };
+type Highlight = { seconds?: number; title?: string; note?: string; category?: string; verdict?: string };
 
 export const timeMachineRouter = router({
   get: protectedProcedure.input(z.object({ sessionId: z.number() })).query(async ({ ctx, input }) => {
@@ -86,7 +91,7 @@ export const timeMachineRouter = router({
       const highlights = (Array.isArray(report.highlights) ? report.highlights : []) as Highlight[];
       const decisionMoments = highlights
         .filter(h => h.verdict !== "good")
-        .map(h => `- [${h.category}] ${h.title}: ${h.note}`)
+        .map(h => `- (at ${typeof h.seconds === "number" ? h.seconds : "?"}s) [${h.category}] ${h.title}: ${h.note}`)
         .join("\n");
 
       const response = await invokeLLM({
