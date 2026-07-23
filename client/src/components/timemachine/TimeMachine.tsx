@@ -10,7 +10,17 @@ import {
   type PossessionPlayer,
   type DefenderPos,
 } from "./possessionData";
-import { Eye, Grid3x3, RotateCcw, Play, Lightbulb, Sparkles } from "lucide-react";
+import { buildPossessions } from "./possessionBuilder";
+import type { PossessionSpec } from "@shared/timeMachine";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
+import { Eye, Grid3x3, RotateCcw, Play, Lightbulb, Sparkles, Loader2, RefreshCw, Film } from "lucide-react";
+
+interface TimeMachineProps {
+  /** When provided, relives this session's AI-reconstructed possessions. */
+  sessionId?: number;
+  opponentName?: string;
+}
 
 /**
  * Time-Machine — "stand inside the possession".
@@ -29,9 +39,35 @@ const EYE_TILT = 58; // degrees of rotateX at eye level
 const RUN_MS = 2600;
 const PASS_MS = 850;
 
-export default function TimeMachine() {
+export default function TimeMachine({ sessionId, opponentName }: TimeMachineProps = {}) {
+  const utils = trpc.useUtils();
+  const { data: specs, isLoading } = trpc.timeMachine.get.useQuery(
+    { sessionId: sessionId! },
+    { enabled: typeof sessionId === "number" }
+  );
+
+  const generate = trpc.timeMachine.generate.useMutation({
+    onSuccess: () => {
+      utils.timeMachine.get.invalidate({ sessionId: sessionId! });
+      toast.success("Possessions reconstructed from the film");
+    },
+    onError: e => toast.error(e.message),
+  });
+
+  // Build real possessions from the AI spec; fall back to the sample set.
+  const live = useMemo(() => {
+    const arr = (specs as PossessionSpec[] | null | undefined) ?? [];
+    return Array.isArray(arr) && arr.length > 0 ? buildPossessions(arr) : [];
+  }, [specs]);
+
+  const usingLive = live.length > 0;
+  const possessions = usingLive ? live : POSSESSIONS;
+
   const [idx, setIdx] = useState(0);
-  const possession = POSSESSIONS[idx];
+  useEffect(() => {
+    setIdx(0);
+  }, [usingLive]);
+  const possession = possessions[Math.min(idx, possessions.length - 1)];
 
   const [eyeLevel, setEyeLevel] = useState(true);
   const [phase, setPhase] = useState<Phase>("ready");
@@ -114,9 +150,42 @@ export default function TimeMachine() {
 
   return (
     <div className="space-y-4">
+      {/* Film source bar */}
+      {typeof sessionId === "number" && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-secondary/40 px-3 py-2">
+          <div className="flex items-center gap-2 text-xs">
+            <Film className={`h-4 w-4 ${usingLive ? "text-green-400" : "text-muted-foreground"}`} />
+            {usingLive ? (
+              <span className="text-foreground">
+                Reliving <span className="font-semibold">{possessions.length}</span> possession
+                {possessions.length > 1 ? "s" : ""} reconstructed from{opponentName ? ` the ${opponentName}` : " this"} film
+              </span>
+            ) : (
+              <span className="text-muted-foreground">
+                Showing example possessions — generate to relive the reads from this game's film.
+              </span>
+            )}
+          </div>
+          <button
+            onClick={() => generate.mutate({ sessionId })}
+            disabled={generate.isPending || isLoading}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-[#FF7A1A] text-black hover:bg-[#ff8c3a] transition-colors disabled:opacity-60"
+          >
+            {generate.isPending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : usingLive ? (
+              <RefreshCw className="h-3.5 w-3.5" />
+            ) : (
+              <Sparkles className="h-3.5 w-3.5" />
+            )}
+            {generate.isPending ? "Reconstructing…" : usingLive ? "Regenerate" : "Generate from film"}
+          </button>
+        </div>
+      )}
+
       {/* Scenario selector */}
       <div className="flex flex-wrap items-center gap-2">
-        {POSSESSIONS.map((p, i) => (
+        {possessions.map((p, i) => (
           <button
             key={p.id}
             onClick={() => setIdx(i)}

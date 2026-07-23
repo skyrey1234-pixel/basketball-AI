@@ -172,7 +172,7 @@ export default function SessionPage() {
                   red, the better read in green.
                 </p>
               </div>
-              <TimeMachine />
+              <TimeMachine sessionId={sessionId} opponentName={session.opponentName} />
             </TabsContent>
           </Tabs>
         )}
