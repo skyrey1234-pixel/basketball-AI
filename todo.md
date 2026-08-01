@@ -38,7 +38,12 @@ Basketball version of TacticalEdge AI (football scouting app), mirroring its str
 - [x] Vitest coverage for routers (9 tests passing)
 - [x] Screenshot verification of key pages
 - [x] TypeScript check clean
-- [ ] Checkpoint saved
+- [x] Checkpoint saved (version 2b80beee)
 
 ## Deferred (needs user input)
 - [ ] Stripe subscription tiers (Scout $99 / Strategist $199 / Program $499) — requires Stripe integration setup; game plan gating included in-code with free access until Stripe is connected
+
+## New Features (in progress)
+- [x] Full React Three Fiber 3D court play diagrams (replace flat SVG PlayCourtDiagram)
+- [x] Coach Style Mode — pick Pop/Stevens/Thibs/etc., AI generates game plan in their system
+- [x] Opponent Weakness Exploiter — Attack Package: 5 plays built specifically to torch opponent weaknesses

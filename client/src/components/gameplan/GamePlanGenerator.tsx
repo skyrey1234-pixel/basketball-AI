@@ -1,5 +1,5 @@
 import { trpc } from "@/lib/trpc";
-import { PlayCourtDiagram } from "./PlayCourtDiagram";
+import { PlayCourt3D } from "./PlayCourt3D";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -47,7 +47,7 @@ function PlaySection({ title, plays, defenseScheme }: { title: string; plays: Pl
                   </div>
                 </div>
               </div>
-              <PlayCourtDiagram
+              <PlayCourt3D
                 set={play.set}
                 playName={play.name}
                 playType={play.playType}

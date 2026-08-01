@@ -111,3 +111,15 @@ export const gamePlans = mysqlTable("game_plans", {
 });
 
 export type GamePlan = typeof gamePlans.$inferSelect;
+
+/**
+ * Cached AI attack packages per session (Opponent Weakness Exploiter).
+ */
+export const attackPackages = mysqlTable("attack_packages", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionId: int("sessionId").notNull(),
+  package: json("package"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AttackPackage = typeof attackPackages.$inferSelect;

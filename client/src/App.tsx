@@ -10,6 +10,7 @@ import NewSession from "./pages/NewSession";
 import SessionPage from "./pages/SessionPage";
 import SeasonDashboard from "./pages/SeasonDashboard";
 import ScoutingChallenge from "./pages/ScoutingChallenge";
+import CoachStyleMode from "./pages/CoachStyleMode";
 
 function Router() {
   return (
@@ -19,6 +20,7 @@ function Router() {
       <Route path={"/new"} component={NewSession} />
       <Route path={"/season"} component={SeasonDashboard} />
       <Route path={"/challenge"} component={ScoutingChallenge} />
+      <Route path={"/coach-style"} component={CoachStyleMode} />
       <Route path={"/session/:id"} component={SessionPage} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}

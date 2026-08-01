@@ -15,6 +15,13 @@
       "when": 1784684968200,
       "tag": "0001_dry_robin_chapel",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1785546760465,
+      "tag": "0002_mature_ricochet",
+      "breakpoints": true
     }
   ]
 }

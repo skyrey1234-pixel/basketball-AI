@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Target, Plus, LayoutDashboard, TrendingUp, Gamepad2, LogOut, Loader2 } from "lucide-react";
+import { Crosshair } from "lucide-react";
 
 const navItems = [
   { path: "/", label: "Sessions", icon: LayoutDashboard },
   { path: "/new", label: "New Analysis", icon: Plus },
   { path: "/season", label: "Season Intel", icon: TrendingUp },
   { path: "/challenge", label: "Scouting Challenge", icon: Gamepad2 },
+  { path: "/coach-style", label: "Coach Style Mode", icon: Crosshair },
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {

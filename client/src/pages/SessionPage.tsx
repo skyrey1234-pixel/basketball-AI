@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, RefreshCw, FileText, Clapperboard, Users, Swords, Shield } from "lucide-react";
+import AttackPackage from "@/components/attack/AttackPackage";
+import { Crosshair } from "lucide-react";
 
 export default function SessionPage() {
   const params = useParams<{ id: string }>();
@@ -140,6 +142,9 @@ export default function SessionPage() {
               <TabsTrigger value="matchup" className="gap-2">
                 <Shield className="h-4 w-4" /> Matchup
               </TabsTrigger>
+              <TabsTrigger value="attack" className="gap-2">
+                <Crosshair className="h-4 w-4" /> Attack Package
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="report">
@@ -156,6 +161,9 @@ export default function SessionPage() {
             </TabsContent>
             <TabsContent value="matchup">
               <MatchupScreen sessionId={sessionId} opponentName={session.opponentName} />
+            </TabsContent>
+            <TabsContent value="attack">
+              <AttackPackage sessionId={sessionId} opponentName={session.opponentName} />
             </TabsContent>
           </Tabs>
         )}

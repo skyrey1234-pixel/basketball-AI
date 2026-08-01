@@ -12,6 +12,9 @@ import {
   filmAnnotations,
   gamePlans,
 } from "../drizzle/schema";
+import {
+  attackPackages,
+} from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -197,4 +200,19 @@ export async function saveGamePlan(sessionId: number, plan: unknown) {
   if (!db) throw new Error("Database not available");
   await db.delete(gamePlans).where(eq(gamePlans.sessionId, sessionId));
   await db.insert(gamePlans).values({ sessionId, plan });
+}
+
+// ===== Attack Packages =====
+export async function getAttackPackage(sessionId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select().from(attackPackages).where(eq(attackPackages.sessionId, sessionId)).orderBy(desc(attackPackages.createdAt)).limit(1);
+  return rows[0]?.package ?? null;
+}
+
+export async function saveAttackPackage(sessionId: number, pkg: unknown) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(attackPackages).where(eq(attackPackages.sessionId, sessionId));
+  await db.insert(attackPackages).values({ sessionId, package: pkg });
 }
