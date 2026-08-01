@@ -65,6 +65,12 @@ export interface Possession {
   lesson: string;
   /** Point swing you left on the table, e.g. "+1.2 pts / poss". */
   valueLeft: string;
+  /** Seconds into the real film where this possession begins (AI-reconstructed only). */
+  filmStart?: number;
+  /** Seconds into the real film at the exact decision point (AI-reconstructed only). */
+  filmDecision?: number;
+  /** Seconds into the real film where the possession ends (AI-reconstructed only). */
+  filmEnd?: number;
 }
 
 // Helper: mirror a spot horizontally around center court (x=50).

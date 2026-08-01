@@ -215,3 +215,17 @@ export const gameResults = mysqlTable("game_results", {
 });
 
 export type GameResult = typeof gameResults.$inferSelect;
+
+/**
+ * AI-reconstructed possessions for the Time Machine, tied to real film timestamps.
+ * Each row holds the full possession set for one session (array of possessions).
+ */
+export const possessions = mysqlTable("possessions", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionId: int("sessionId").notNull(),
+  /** Array of possession objects: film window, players, defenders, actual vs best read. */
+  data: json("data"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type PossessionRow = typeof possessions.$inferSelect;

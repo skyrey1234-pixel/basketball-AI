@@ -66,3 +66,14 @@ Basketball version of TacticalEdge AI (football scouting app), mirroring its str
 - [x] 2K-style cutscene intro when opening a session (team name reveal, glitch text)
 - [x] MyCoach Mode campaign: weekly opponents, bracket progression, coins, leaderboard
 - [x] Post-Game Prediction vs Reality: enter final score, accuracy %, season track record
+
+## Time Machine — Real Film Playback
+- [x] `possessions` table + db helpers for AI-reconstructed possessions
+- [x] `possessions` router: rebuild real possessions off report key moments with film windows
+- [x] Timestamp clamping so a bad AI number can never seek past the film
+- [x] FilmPossessionPlayer: YouTube IFrame API + native video, bounded clip, auto-freeze at decision
+- [x] Scrub bar with decision marker, Jump to decision / Replay / Restart controls
+- [x] Split view (Film + Diagram / Film only / Diagram only) with synced freeze
+- [x] "Build from film" CTA + FROM YOUR FILM badge when real possessions exist
+- [x] XP reward for rebuilding possessions from film
+- [x] Vitest coverage for possessions router guards + window clamping (10 tests)

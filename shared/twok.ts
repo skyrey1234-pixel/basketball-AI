@@ -108,6 +108,7 @@ export const XP_REWARDS = {
   attackPackage: 200,
   coachStylePlan: 200,
   resultLogged: 150,
+  possessionsRebuilt: 250,
 } as const;
 
 /** XP needed to reach a given level (quadratic curve like 2K). */

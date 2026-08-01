@@ -10,6 +10,7 @@ import { gamePlanRouter } from "./routers/gamePlan";
 import { seasonRouter } from "./routers/season";
 import { coachStyleRouter } from "./routers/coachStyle";
 import { attackPackageRouter } from "./routers/attackPackage";
+import { possessionsRouter } from "./routers/possessions";
 import { dnaRouter } from "./routers/dna";
 import { progressRouter } from "./routers/progress";
 import { playbookRouter } from "./routers/playbook";
@@ -37,6 +38,7 @@ export const appRouter = router({
   season: seasonRouter,
   coachStyle: coachStyleRouter,
   attackPackage: attackPackageRouter,
+  possessions: possessionsRouter,
   dna: dnaRouter,
   progress: progressRouter,
   playbook: playbookRouter,

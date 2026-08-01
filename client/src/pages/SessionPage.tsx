@@ -205,12 +205,18 @@ export default function SessionPage() {
                   <Rewind className="h-5 w-5 text-[#FF7A1A]" /> Time Machine
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
-                  Stand inside the possession and relive the decision. Run it, freeze at the moment of
-                  the read, then reveal the open teammate you missed — the pass you actually made in
-                  red, the better read in green.
+                  Watch the real possession on the actual film, frozen on the exact frame where the
+                  decision had to be made — then flip to the diagram to see the open teammate that was
+                  missed. The pass that was made is red, the better read is green.
                 </p>
               </div>
-              <TimeMachine />
+              <TimeMachine
+                sessionId={sessionId}
+                sourceType={session.sourceType}
+                youtubeVideoId={session.youtubeVideoId}
+                videoUrl={session.videoUrl}
+                reportReady={session.status === "complete" && Boolean(report)}
+              />
             </TabsContent>
             <TabsContent value="postgame">
               <div className="mb-5">

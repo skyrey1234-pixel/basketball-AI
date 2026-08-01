@@ -10,28 +10,85 @@ import {
   type PossessionPlayer,
   type DefenderPos,
 } from "./possessionData";
-import { Eye, Grid3x3, RotateCcw, Play, Lightbulb, Sparkles } from "lucide-react";
+import { Eye, Grid3x3, RotateCcw, Play, Lightbulb, Sparkles, Film, Layers, Wand2, Loader2 } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
+import FilmPossessionPlayer from "./FilmPossessionPlayer";
 
 /**
  * Time-Machine — "stand inside the possession".
  *
- * A pseudo-3D perspective replay: the possession runs across a court plane that
- * tilts toward the ball-handler's eye level, freezes at the decision point, and
- * then reveals the read that was actually made (red) versus the open teammate
- * that was missed (green). No headset, no heavy 3D engine — a CSS-3D floor plane
- * with billboarded player tokens, driven by the same court model as the play
- * diagrams elsewhere in the app.
+ * Pairs the ACTUAL game film with a pseudo-3D tactical replay. The real clip
+ * plays and auto-freezes on the exact frame where the ball-handler had to decide;
+ * the diagram beside it runs the same possession from the ball-handler's eye
+ * level, then reveals the read that was made (red) versus the open teammate that
+ * was missed (green).
+ *
+ * When the session has AI-reconstructed possessions, each one carries a real film
+ * window (filmStart / filmDecision / filmEnd) so film and diagram stay in sync.
+ * Without them, the built-in teaching scenarios are used and only the diagram runs.
  */
 
 type Phase = "ready" | "running" | "decision" | "revealed";
+type ViewMode = "split" | "film" | "diagram";
 
 const EYE_TILT = 58; // degrees of rotateX at eye level
 const RUN_MS = 2600;
 const PASS_MS = 850;
 
-export default function TimeMachine() {
+type Props = {
+  sessionId?: number;
+  sourceType?: "youtube" | "upload";
+  youtubeVideoId?: string | null;
+  videoUrl?: string | null;
+  /** Only offer film reconstruction once the scouting report exists. */
+  reportReady?: boolean;
+};
+
+export default function TimeMachine({
+  sessionId,
+  sourceType,
+  youtubeVideoId,
+  videoUrl,
+  reportReady,
+}: Props = {}) {
   const [idx, setIdx] = useState(0);
-  const possession = POSSESSIONS[idx];
+  const [viewMode, setViewMode] = useState<ViewMode>("split");
+
+  // AI-reconstructed possessions tied to real film timestamps.
+  const { data: aiPossessions } = trpc.possessions.get.useQuery(
+    { sessionId: sessionId as number },
+    { enabled: typeof sessionId === "number" && !Number.isNaN(sessionId) }
+  );
+
+  const utils = trpc.useUtils();
+  const generateMutation = trpc.possessions.generate.useMutation({
+    onSuccess: () => {
+      utils.possessions.get.invalidate({ sessionId: sessionId as number });
+      setIdx(0);
+      toast.success("Possessions reconstructed from your film");
+    },
+    onError: e => toast.error(e.message),
+  });
+
+  // Real film possessions win; otherwise fall back to the teaching scenarios.
+  const filmPossessions = useMemo(
+    () => (Array.isArray(aiPossessions) ? (aiPossessions as Possession[]) : null),
+    [aiPossessions]
+  );
+  const list: Possession[] = filmPossessions && filmPossessions.length > 0 ? filmPossessions : POSSESSIONS;
+  const usingFilm = Boolean(filmPossessions && filmPossessions.length > 0);
+
+  const safeIdx = Math.min(idx, list.length - 1);
+  const possession = list[safeIdx];
+
+  // Only show the film pane when this possession actually has a film window.
+  const hasFilmWindow =
+    usingFilm &&
+    typeof possession.filmStart === "number" &&
+    typeof possession.filmDecision === "number" &&
+    typeof possession.filmEnd === "number";
+  const canPlayFilm = hasFilmWindow && Boolean(sourceType) && Boolean(youtubeVideoId || videoUrl);
 
   const [eyeLevel, setEyeLevel] = useState(true);
   const [phase, setPhase] = useState<Phase>("ready");
@@ -61,7 +118,7 @@ export default function TimeMachine() {
   useEffect(() => {
     reset();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [idx]);
+  }, [safeIdx, usingFilm]);
 
   useEffect(() => () => stopRaf(), [stopRaf]);
 
@@ -112,16 +169,63 @@ export default function TimeMachine() {
   const showReads = phase === "revealed";
   const showActual = phase === "decision" || phase === "revealed";
 
+  /**
+   * The film reached the decision frame — snap the diagram to its own freeze so
+   * both panes are showing the same instant.
+   */
+  const handleFilmDecision = useCallback(() => {
+    stopRaf();
+    setProgress(1);
+    setPassT(0);
+    setPhase("decision");
+  }, [stopRaf]);
+
+  const showFilmPane = canPlayFilm && viewMode !== "diagram";
+  const showDiagramPane = !canPlayFilm || viewMode !== "film";
+
   return (
     <div className="space-y-4">
+      {/* Film reconstruction banner */}
+      {typeof sessionId === "number" && !usingFilm && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#FF7A1A]/30 bg-[#FF7A1A]/5 p-3">
+          <div className="flex items-start gap-2.5">
+            <div className="rounded-md bg-[#FF7A1A]/15 p-1.5 shrink-0">
+              <Film className="h-4 w-4 text-[#FF7A1A]" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">Pull possessions from your actual film</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Rebuilds real possessions off the key moments in this game, so the clip plays and freezes on the exact
+                decision. Showing sample scenarios until then.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => sessionId && generateMutation.mutate({ sessionId })}
+            disabled={generateMutation.isPending || !reportReady}
+            className="flex items-center gap-2 rounded-lg bg-[#FF7A1A] px-3 py-2 text-xs font-semibold text-black transition-transform active:scale-95 disabled:opacity-50"
+          >
+            {generateMutation.isPending ? (
+              <>
+                <Loader2 className="h-3.5 w-3.5 animate-spin" /> Reading the film…
+              </>
+            ) : (
+              <>
+                <Wand2 className="h-3.5 w-3.5" /> {reportReady ? "Build from film" : "Report not ready"}
+              </>
+            )}
+          </button>
+        </div>
+      )}
+
       {/* Scenario selector */}
       <div className="flex flex-wrap items-center gap-2">
-        {POSSESSIONS.map((p, i) => (
+        {list.map((p, i) => (
           <button
             key={p.id}
             onClick={() => setIdx(i)}
             className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-              i === idx
+              i === safeIdx
                 ? "bg-[#FF7A1A] text-black border-[#FF7A1A]"
                 : "bg-secondary text-muted-foreground border-border hover:text-foreground"
             }`}
@@ -129,6 +233,11 @@ export default function TimeMachine() {
             {p.title}
           </button>
         ))}
+        {usingFilm && (
+          <span className="ml-1 inline-flex items-center gap-1 rounded-full border border-green-500/40 bg-green-500/10 px-2 py-1 font-mono text-[10px] text-green-400">
+            <Film className="h-3 w-3" /> FROM YOUR FILM
+          </span>
+        )}
       </div>
 
       {/* Situation + view controls */}
@@ -161,6 +270,56 @@ export default function TimeMachine() {
         </div>
       </div>
 
+      {/* Film / diagram view toggle — only meaningful when real film is attached */}
+      {canPlayFilm && (
+        <div className="flex items-center gap-1 rounded-lg border border-border bg-secondary p-1 w-fit">
+          {(
+            [
+              { key: "split", label: "Film + Diagram", icon: Layers },
+              { key: "film", label: "Film only", icon: Film },
+              { key: "diagram", label: "Diagram only", icon: Grid3x3 },
+            ] as const
+          ).map(opt => (
+            <button
+              key={opt.key}
+              onClick={() => setViewMode(opt.key)}
+              className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                viewMode === opt.key ? "bg-[#FF7A1A] text-black" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <opt.icon className="h-3.5 w-3.5" /> {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Film + diagram stage */}
+      <div className={showFilmPane && showDiagramPane ? "grid gap-4 lg:grid-cols-2" : ""}>
+        {showFilmPane && (
+          <div className="space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              What actually happened
+            </p>
+            <FilmPossessionPlayer
+              sourceType={sourceType ?? "youtube"}
+              youtubeVideoId={youtubeVideoId}
+              videoUrl={videoUrl}
+              filmStart={possession.filmStart as number}
+              filmDecision={possession.filmDecision as number}
+              filmEnd={possession.filmEnd as number}
+              onDecisionReached={handleFilmDecision}
+              resetKey={`${possession.id}-${safeIdx}`}
+            />
+          </div>
+        )}
+
+        {showDiagramPane && (
+        <div className="space-y-2">
+          {showFilmPane && (
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              What was open
+            </p>
+          )}
       {/* 3D court stage */}
       <div
         className="relative w-full rounded-xl overflow-hidden border border-border"
@@ -271,6 +430,9 @@ export default function TimeMachine() {
               {possession.narration}
             </p>
           </div>
+        )}
+      </div>
+        </div>
         )}
       </div>
 

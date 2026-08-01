@@ -14,6 +14,7 @@ import {
 } from "../drizzle/schema";
 import {
   attackPackages,
+  possessions,
 } from "../drizzle/schema";
 import {
   playerDna,
@@ -222,6 +223,27 @@ export async function saveAttackPackage(sessionId: number, pkg: unknown) {
   if (!db) throw new Error("Database not available");
   await db.delete(attackPackages).where(eq(attackPackages.sessionId, sessionId));
   await db.insert(attackPackages).values({ sessionId, package: pkg });
+}
+
+// ===== Time Machine possessions =====
+
+export async function getPossessions(sessionId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db
+    .select()
+    .from(possessions)
+    .where(eq(possessions.sessionId, sessionId))
+    .orderBy(desc(possessions.createdAt))
+    .limit(1);
+  return rows[0]?.data ?? null;
+}
+
+export async function savePossessions(sessionId: number, data: unknown) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(possessions).where(eq(possessions.sessionId, sessionId));
+  await db.insert(possessions).values({ sessionId, data });
 }
 
 /* ------------------------------------------------------------------ */
