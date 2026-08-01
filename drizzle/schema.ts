@@ -123,3 +123,95 @@ export const attackPackages = mysqlTable("attack_packages", {
 });
 
 export type AttackPackage = typeof attackPackages.$inferSelect;
+
+/**
+ * 2K-style deep player DNA: tendency ratings 0-99, hot zones, badges, clutch ratings.
+ * One row per scouted opponent player.
+ */
+export const playerDna = mysqlTable("player_dna", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionId: int("sessionId").notNull(),
+  playerProfileId: int("playerProfileId").notNull(),
+  overall: int("overall").notNull(),
+  rarity: mysqlEnum("rarity", ["bronze", "silver", "gold", "diamond"]).default("bronze").notNull(),
+  /** 0-99 tendency ratings keyed by name */
+  tendencies: json("tendencies"),
+  /** Attribute ratings 0-99 keyed by name */
+  attributes: json("attributes"),
+  /** Array of { zone, rating, label } for the half-court heat map */
+  hotZones: json("hotZones"),
+  /** Array of earned badge ids */
+  badges: json("badges"),
+  clutchRating: int("clutchRating").default(50).notNull(),
+  underPressure: int("underPressure").default(50).notNull(),
+  lateShotClock: int("lateShotClock").default(50).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type PlayerDna = typeof playerDna.$inferSelect;
+export type InsertPlayerDna = typeof playerDna.$inferInsert;
+
+/**
+ * Coach progression: XP, level, coins, earned badges, scouting accuracy.
+ */
+export const coachProgress = mysqlTable("coach_progress", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  xp: int("xp").default(0).notNull(),
+  level: int("level").default(1).notNull(),
+  coins: int("coins").default(0).notNull(),
+  /** Array of earned coach badge ids */
+  badges: json("badges"),
+  filmsAnalyzed: int("filmsAnalyzed").default(0).notNull(),
+  plansGenerated: int("plansGenerated").default(0).notNull(),
+  challengesWon: int("challengesWon").default(0).notNull(),
+  playsDesigned: int("playsDesigned").default(0).notNull(),
+  predictionsLogged: int("predictionsLogged").default(0).notNull(),
+  accuracySum: int("accuracySum").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CoachProgress = typeof coachProgress.$inferSelect;
+
+/**
+ * User-designed plays saved from the Play Designer.
+ */
+export const customPlays = mysqlTable("custom_plays", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 160 }).notNull(),
+  set: varchar("set", { length: 80 }),
+  playType: varchar("playType", { length: 32 }),
+  /** Array of { position, x, y } player spots */
+  positions: json("positions"),
+  /** Array of { from, to, kind } routes */
+  routes: json("routes"),
+  notes: text("notes"),
+  /** AI grade payload: { grade, score, strengths[], fixes[] } */
+  aiGrade: json("aiGrade"),
+  shareId: varchar("shareId", { length: 24 }).unique(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type CustomPlay = typeof customPlays.$inferSelect;
+
+/**
+ * Post-game actual results vs AI prediction, for scouting accuracy tracking.
+ */
+export const gameResults = mysqlTable("game_results", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionId: int("sessionId").notNull().unique(),
+  userId: int("userId").notNull(),
+  ourScore: int("ourScore").notNull(),
+  theirScore: int("theirScore").notNull(),
+  predictedTheirScore: int("predictedTheirScore"),
+  accuracyPct: int("accuracyPct"),
+  won: int("won").default(0).notNull(),
+  notes: text("notes"),
+  /** AI comparison of prediction vs reality */
+  aiReview: text("aiReview"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type GameResult = typeof gameResults.$inferSelect;

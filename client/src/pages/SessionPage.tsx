@@ -12,8 +12,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, RefreshCw, FileText, Clapperboard, Users, Swords, Shield, Rewind, Crosshair } from "lucide-react";
+import { ArrowLeft, Loader2, RefreshCw, FileText, Clapperboard, Users, Swords, Shield, Rewind, Crosshair, Dna, Flame, Target } from "lucide-react";
 import AttackPackage from "@/components/attack/AttackPackage";
+import DnaLab from "@/components/dna/DnaLab";
+import BattleScreen from "@/components/matchup/BattleScreen";
+import AnalyzingScreen from "@/components/loading/AnalyzingScreen";
+import PostGame from "@/components/results/PostGame";
 
 export default function SessionPage() {
   const params = useParams<{ id: string }>();
@@ -108,13 +112,7 @@ export default function SessionPage() {
         </div>
 
         {session.status === "analyzing" ? (
-          <div className="border border-dashed border-border rounded-xl py-24 flex flex-col items-center text-center">
-            <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-            <h3 className="text-lg font-semibold mb-1">The AI is in the film room</h3>
-            <p className="text-sm text-muted-foreground max-w-sm">
-              Breaking down {session.opponentName}'s sets, coverages, and tendencies. This usually takes under a minute.
-            </p>
-          </div>
+          <AnalyzingScreen opponentName={session.opponentName} />
         ) : session.status === "failed" ? (
           <div className="border border-dashed border-destructive/40 rounded-xl py-24 flex flex-col items-center text-center">
             <h3 className="text-lg font-semibold mb-1 text-destructive">Analysis failed</h3>
@@ -136,17 +134,26 @@ export default function SessionPage() {
               <TabsTrigger value="players" className="gap-2">
                 <Users className="h-4 w-4" /> Player Profiles
               </TabsTrigger>
+              <TabsTrigger value="dna" className="gap-2">
+                <Dna className="h-4 w-4" /> DNA Lab
+              </TabsTrigger>
               <TabsTrigger value="gameplan" className="gap-2">
                 <Swords className="h-4 w-4" /> Game Plan
               </TabsTrigger>
               <TabsTrigger value="matchup" className="gap-2">
                 <Shield className="h-4 w-4" /> Matchup
               </TabsTrigger>
+              <TabsTrigger value="battle" className="gap-2">
+                <Flame className="h-4 w-4" /> Battle Screen
+              </TabsTrigger>
               <TabsTrigger value="attack" className="gap-2">
                 <Crosshair className="h-4 w-4" /> Attack Package
               </TabsTrigger>
               <TabsTrigger value="timemachine" className="gap-2">
                 <Rewind className="h-4 w-4" /> Time Machine
+              </TabsTrigger>
+              <TabsTrigger value="postgame" className="gap-2">
+                <Target className="h-4 w-4" /> Post Game
               </TabsTrigger>
             </TabsList>
 
@@ -159,11 +166,35 @@ export default function SessionPage() {
             <TabsContent value="players">
               <PlayerProfiles sessionId={sessionId} opponentName={session.opponentName} />
             </TabsContent>
+            <TabsContent value="dna">
+              <div className="mb-5">
+                <h2 className="text-lg font-bold flex items-center gap-2">
+                  <Dna className="h-5 w-5 text-[#FF7A1A]" /> DNA Lab
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
+                  Every scouted player converted into a 2K-style card — 0-99 tendency ratings, hot and
+                  cold shooting zones, earned badges, and clutch numbers. Tap a card to flip it.
+                </p>
+              </div>
+              <DnaLab sessionId={sessionId} opponentName={session.opponentName} />
+            </TabsContent>
             <TabsContent value="gameplan">
               <GamePlanGenerator sessionId={sessionId} opponentName={session.opponentName} />
             </TabsContent>
             <TabsContent value="matchup">
               <MatchupScreen sessionId={sessionId} opponentName={session.opponentName} />
+            </TabsContent>
+            <TabsContent value="battle">
+              <div className="mb-5">
+                <h2 className="text-lg font-bold flex items-center gap-2">
+                  <Flame className="h-5 w-5 text-[#FF7A1A]" /> Battle Screen
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
+                  Head-to-head, MyTeam style. Their attribute ratings on the right, the defensive load
+                  that matchup demands on the left. Green means we can live with it; red means send help.
+                </p>
+              </div>
+              <BattleScreen sessionId={sessionId} opponentName={session.opponentName} />
             </TabsContent>
             <TabsContent value="attack">
               <AttackPackage sessionId={sessionId} opponentName={session.opponentName} />
@@ -180,6 +211,19 @@ export default function SessionPage() {
                 </p>
               </div>
               <TimeMachine />
+            </TabsContent>
+            <TabsContent value="postgame">
+              <div className="mb-5">
+                <h2 className="text-lg font-bold flex items-center gap-2">
+                  <Target className="h-5 w-5 text-[#FF7A1A]" /> Post Game: Prediction vs Reality
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
+                  Close the loop. Log the final score and the AI grades its own report — what it called
+                  correctly, what it missed, and how to scout {session.opponentName} better next time.
+                  Your scouting accuracy feeds your Coach Card.
+                </p>
+              </div>
+              <PostGame sessionId={sessionId} opponentName={session.opponentName} />
             </TabsContent>
           </Tabs>
         )}

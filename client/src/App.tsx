@@ -11,7 +11,8 @@ import SessionPage from "./pages/SessionPage";
 import SeasonDashboard from "./pages/SeasonDashboard";
 import ScoutingChallenge from "./pages/ScoutingChallenge";
 import CoachStyleMode from "./pages/CoachStyleMode";
-
+import CoachCard from "./pages/CoachCard";
+import PlayDesigner from "./pages/PlayDesigner";
 function Router() {
   return (
     <Switch>
@@ -21,6 +22,8 @@ function Router() {
       <Route path={"/season"} component={SeasonDashboard} />
       <Route path={"/challenge"} component={ScoutingChallenge} />
       <Route path={"/coach-style"} component={CoachStyleMode} />
+      <Route path={"/coach-card"} component={CoachCard} />
+      <Route path={"/play-designer"} component={PlayDesigner} />
       <Route path={"/session/:id"} component={SessionPage} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}

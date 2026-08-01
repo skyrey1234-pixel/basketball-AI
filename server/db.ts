@@ -15,6 +15,13 @@ import {
 import {
   attackPackages,
 } from "../drizzle/schema";
+import {
+  playerDna,
+  coachProgress,
+  customPlays,
+  gameResults,
+  type InsertPlayerDna,
+} from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -215,4 +222,156 @@ export async function saveAttackPackage(sessionId: number, pkg: unknown) {
   if (!db) throw new Error("Database not available");
   await db.delete(attackPackages).where(eq(attackPackages.sessionId, sessionId));
   await db.insert(attackPackages).values({ sessionId, package: pkg });
+}
+
+/* ------------------------------------------------------------------ */
+/* 2K Player DNA                                                       */
+/* ------------------------------------------------------------------ */
+
+export async function listPlayerDnaBySession(sessionId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(playerDna).where(eq(playerDna.sessionId, sessionId));
+}
+
+export async function savePlayerDna(sessionId: number, rows: InsertPlayerDna[]) {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(playerDna).where(eq(playerDna.sessionId, sessionId));
+  if (rows.length === 0) return;
+  await db.insert(playerDna).values(rows);
+}
+
+/* ------------------------------------------------------------------ */
+/* Coach progression (XP, level, coins, badges)                        */
+/* ------------------------------------------------------------------ */
+
+export async function getCoachProgress(userId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db
+    .select()
+    .from(coachProgress)
+    .where(eq(coachProgress.userId, userId))
+    .limit(1);
+  if (rows.length > 0) return rows[0];
+  await db.insert(coachProgress).values({ userId, badges: [] });
+  const created = await db
+    .select()
+    .from(coachProgress)
+    .where(eq(coachProgress.userId, userId))
+    .limit(1);
+  return created[0];
+}
+
+export async function updateCoachProgress(
+  userId: number,
+  patch: Partial<{
+    xp: number;
+    level: number;
+    coins: number;
+    badges: unknown;
+    filmsAnalyzed: number;
+    plansGenerated: number;
+    challengesWon: number;
+    playsDesigned: number;
+    predictionsLogged: number;
+    accuracySum: number;
+  }>
+) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(coachProgress).set(patch).where(eq(coachProgress.userId, userId));
+}
+
+/* ------------------------------------------------------------------ */
+/* Play Designer — custom plays                                        */
+/* ------------------------------------------------------------------ */
+
+export async function listCustomPlays(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(customPlays)
+    .where(eq(customPlays.userId, userId))
+    .orderBy(desc(customPlays.createdAt));
+}
+
+export async function getCustomPlayByShareId(shareId: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db
+    .select()
+    .from(customPlays)
+    .where(eq(customPlays.shareId, shareId))
+    .limit(1);
+  return rows[0];
+}
+
+export async function createCustomPlay(data: {
+  userId: number;
+  name: string;
+  set?: string | null;
+  playType?: string | null;
+  positions: unknown;
+  routes: unknown;
+  notes?: string | null;
+  aiGrade?: unknown;
+  shareId: string;
+}) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const res = await db.insert(customPlays).values(data);
+  return (res as unknown as { insertId: number }).insertId;
+}
+
+export async function deleteCustomPlay(id: number, userId: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .delete(customPlays)
+    .where(and(eq(customPlays.id, id), eq(customPlays.userId, userId)));
+}
+
+/* ------------------------------------------------------------------ */
+/* Post-game results (prediction vs reality)                           */
+/* ------------------------------------------------------------------ */
+
+export async function getGameResult(sessionId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db
+    .select()
+    .from(gameResults)
+    .where(eq(gameResults.sessionId, sessionId))
+    .limit(1);
+  return rows[0];
+}
+
+export async function listGameResults(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(gameResults)
+    .where(eq(gameResults.userId, userId))
+    .orderBy(desc(gameResults.createdAt));
+}
+
+export async function saveGameResult(data: {
+  sessionId: number;
+  userId: number;
+  ourScore: number;
+  theirScore: number;
+  predictedTheirScore?: number | null;
+  accuracyPct?: number | null;
+  won: number;
+  notes?: string | null;
+  aiReview?: string | null;
+}) {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(gameResults).where(eq(gameResults.sessionId, data.sessionId));
+  await db.insert(gameResults).values(data);
 }

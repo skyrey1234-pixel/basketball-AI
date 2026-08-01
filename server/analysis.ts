@@ -150,6 +150,18 @@ Base your analysis on realistic patterns for a competitive team at this level. B
     });
 
     await db.updateSessionStatus(sessionId, "complete");
+
+    // Award coach XP for a completed film breakdown.
+    try {
+      const session = await db.getSession(sessionId);
+      if (session) {
+        const { awardXp } = await import("./routers/progress");
+        const { XP_REWARDS } = await import("../shared/twok");
+        await awardXp(session.userId, XP_REWARDS.filmAnalyzed, "filmsAnalyzed");
+      }
+    } catch (xpError) {
+      console.warn("[Analysis] XP award failed:", xpError);
+    }
   } catch (error) {
     console.error(`[Analysis] Report generation failed for session ${sessionId}:`, error);
     await db.updateSessionStatus(sessionId, "failed");

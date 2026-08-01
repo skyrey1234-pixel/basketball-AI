@@ -6,7 +6,79 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Plus, Youtube, Upload, Trash2, Loader2, CircleCheck, CircleX, Clapperboard } from "lucide-react";
+import { Plus, Youtube, Upload, Trash2, Loader2, CircleCheck, CircleX, Clapperboard, Trophy, ChevronRight } from "lucide-react";
+
+/** Compact XP strip that links through to the full Coach Card. */
+function CoachStrip() {
+  const { data } = trpc.progress.me.useQuery();
+  if (!data) return null;
+  return (
+    <Link href="/coach-card">
+      <div
+        className="group mb-6 rounded-xl border p-4 cursor-pointer transition-all active:scale-[0.995]"
+        style={{
+          borderColor: "rgba(255,122,26,0.28)",
+          background:
+            "linear-gradient(120deg,rgba(255,122,26,0.09),rgba(255,197,61,0.04) 55%,transparent)",
+          transitionDuration: "180ms",
+        }}
+      >
+        <div className="flex items-center gap-4">
+          <div
+            className="shrink-0 h-11 w-11 rounded-lg flex flex-col items-center justify-center"
+            style={{
+              background: "linear-gradient(150deg,rgba(255,197,61,0.24),rgba(255,122,26,0.1))",
+              border: "1px solid rgba(255,197,61,0.45)",
+            }}
+          >
+            <span className="text-[7px] font-black uppercase tracking-wider text-yellow-500/80 leading-none">
+              LVL
+            </span>
+            <span className="text-lg font-black leading-none text-yellow-400 tabular-nums">
+              {data.level}
+            </span>
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mb-1.5">
+              <Trophy className="h-3.5 w-3.5 text-orange-400 shrink-0" />
+              <span className="text-[11px] font-black uppercase tracking-[0.14em] text-orange-300">
+                Coach Card
+              </span>
+              <span className="text-[11px] text-muted-foreground tabular-nums">
+                {data.xp.toLocaleString()} XP
+              </span>
+              {data.badges.length > 0 && (
+                <span className="text-[11px] text-muted-foreground">
+                  · {data.badges.length} badges
+                </span>
+              )}
+              {data.scoutingAccuracy !== null && (
+                <span className="text-[11px] text-muted-foreground">
+                  · {data.scoutingAccuracy}% accuracy
+                </span>
+              )}
+            </div>
+            <div className="h-1.5 rounded-full bg-white/[0.07] overflow-hidden">
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: `${data.progress.pct}%`,
+                  background: "linear-gradient(90deg,#FF7A1A,#FFC53D)",
+                  boxShadow: "0 0 10px rgba(255,122,26,0.5)",
+                }}
+              />
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-1 tabular-nums">
+              {(data.progress.needed - data.progress.into).toLocaleString()} XP to Level{" "}
+              {data.level + 1}
+            </p>
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 transition-transform group-hover:translate-x-0.5" />
+        </div>
+      </div>
+    </Link>
+  );
+}
 
 function StatusBadge({ status }: { status: string }) {
   if (status === "analyzing")
@@ -57,6 +129,8 @@ export default function Dashboard() {
             </Button>
           </Link>
         </div>
+
+        <CoachStrip />
 
         {isLoading ? (
           <div className="space-y-3">

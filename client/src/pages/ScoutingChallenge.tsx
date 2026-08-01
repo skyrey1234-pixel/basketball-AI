@@ -6,6 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { motion, AnimatePresence } from "framer-motion";
 import { Gamepad2, Trophy, RotateCcw, CircleCheck, CircleX } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
+import { COACH_BADGES } from "@shared/twok";
 
 type Question = {
   category: string;
@@ -143,10 +146,32 @@ export default function ScoutingChallenge() {
   const current = questions[index];
   const isAnswered = selected !== null;
 
+  const utils = trpc.useUtils();
+  const awardChallenge = trpc.progress.awardChallenge.useMutation({
+    onSuccess: res => {
+      if (!res) return;
+      utils.progress.me.invalidate();
+      if (res.leveledUp) {
+        toast.success(`Level ${res.level}`, {
+          description: "Your Coach Card just leveled up.",
+        });
+      }
+      for (const id of res.newlyEarned) {
+        const badge = COACH_BADGES.find(b => b.id === id);
+        toast.success(`Badge unlocked: ${badge?.label ?? id}`, {
+          description: badge?.desc,
+        });
+      }
+    },
+  });
+
   const handleSelect = (i: number) => {
     if (isAnswered) return;
     setSelected(i);
-    if (i === current.answer) setScore(s => s + 1);
+    if (i === current.answer) {
+      setScore(s => s + 1);
+      awardChallenge.mutate({ correct: true });
+    }
   };
 
   const handleNext = () => {
@@ -195,6 +220,9 @@ export default function ScoutingChallenge() {
                 <Badge variant="outline" className="mb-6 font-bold tracking-wider" style={{ borderColor: grade.color, color: grade.color }}>
                   {grade.label}
                 </Badge>
+                <p className="text-xs text-muted-foreground mb-6 -mt-3">
+                  +{score * 100} XP banked to your Coach Card
+                </p>
                 <Button className="gap-2 font-semibold" onClick={handleRestart}>
                   <RotateCcw className="h-4 w-4" /> Run It Back
                 </Button>

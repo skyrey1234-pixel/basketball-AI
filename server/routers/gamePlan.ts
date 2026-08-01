@@ -3,6 +3,8 @@ import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
 import * as db from "../db";
+import { XP_REWARDS } from "../../shared/twok";
+import { awardXp } from "./progress";
 
 const PLAY_ITEM = {
   type: "object" as const,
@@ -103,6 +105,7 @@ export const gamePlanRouter = router({
       const raw = response.choices[0]?.message?.content;
       const plan = JSON.parse(typeof raw === "string" ? raw : "{}");
       await db.saveGamePlan(input.sessionId, plan);
+      await awardXp(ctx.user.id, XP_REWARDS.gamePlanGenerated, "plansGenerated");
       return plan;
     }),
 });
