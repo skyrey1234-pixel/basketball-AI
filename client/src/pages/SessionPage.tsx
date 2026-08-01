@@ -1,4 +1,4 @@
-import { useParams, Link } from "wouter";
+import { useParams, Link, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
 import AppLayout from "@/components/AppLayout";
 import ReportView from "@/components/report/ReportView";
@@ -23,6 +23,8 @@ export default function SessionPage() {
   const params = useParams<{ id: string }>();
   const sessionId = Number(params.id);
   const utils = trpc.useUtils();
+  const search = useSearch();
+  const initialTab = new URLSearchParams(search).get("tab") ?? "report";
 
   const { data: session, isLoading: sessionLoading } = trpc.sessions.get.useQuery(
     { id: sessionId },
@@ -123,7 +125,7 @@ export default function SessionPage() {
         ) : reportLoading || !report ? (
           <Skeleton className="h-[420px] w-full rounded-xl" />
         ) : (
-          <Tabs defaultValue="report">
+          <Tabs defaultValue={initialTab} key={initialTab}>
             <TabsList className="mb-6 flex-wrap h-auto">
               <TabsTrigger value="report" className="gap-2">
                 <FileText className="h-4 w-4" /> Scouting Report

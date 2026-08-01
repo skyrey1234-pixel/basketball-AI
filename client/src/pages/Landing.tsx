@@ -21,50 +21,56 @@ const ORANGE = "#FF7A1A";
 
 const tiers = [
   {
-    name: "Scout",
-    price: 99,
+    name: "Basic Build",
+    setup: 3000,
+    price: 70,
     icon: Zap,
     color: "#60A5FA",
-    description: "Essential scouting for competitive programs",
+    description: "Core scouting, built and running for your program",
     features: [
       "AI Scouting Reports",
+      "Film Breakdown with Annotations",
+      "Player Tendency Cards",
       "Season Intel Dashboard",
-      "Player Tendency Profiles",
-      "5 sessions/month",
-      "SVG Film Annotations",
+      "Unlimited scouting sessions",
+      "Core updates included",
     ],
-    cta: "Start Scouting",
+    cta: "Start With Basic",
   },
   {
-    name: "Strategist",
-    price: 199,
+    name: "Full Program",
+    setup: 10000,
+    price: 150,
     icon: Crown,
     color: ORANGE,
     popular: true,
-    description: "Full game planning for serious coaching staffs",
+    description: "Every feature we build, now and as it ships",
     features: [
-      "Everything in Scout",
-      "AI Game Plan Generator",
-      "Animated 2K-Style Play Diagrams",
-      "Unlimited sessions",
-      "ATO / BLOB / SLOB Packages",
-      "Scouting Challenge Mode",
+      "Everything in Basic Build",
+      "AI Game Plan Generator + 3D Play Diagrams",
+      "Time Machine film review",
+      "Attack Package & Coach Style Mode",
+      "Play Designer, Coach Card & Challenge",
+      "Custom build requests",
+      "All future updates, free",
+      "Unlimited coach seats",
     ],
-    cta: "Get Strategist",
+    cta: "Get Full Program",
   },
   {
-    name: "Program",
-    price: 499,
+    name: "The Finnese Package",
+    setup: 20000,
+    price: 500,
     icon: Building2,
     color: "#FFD700",
-    description: "Enterprise solution for entire athletic programs",
+    description: "Everything, and nobody else in your district gets it",
     features: [
-      "Everything in Strategist",
-      "5-10 team seats",
-      "API access",
-      "Priority support",
+      "Everything in Full Program",
+      "District exclusivity — one program only",
+      "New features first, before anyone",
+      "Priority custom build queue",
       "Custom branding",
-      "Dedicated account manager",
+      "Direct line support",
     ],
     cta: "Contact Sales",
   },
@@ -336,7 +342,9 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4">Pick Your Game Plan</h2>
-            <p className="text-gray-400">Monthly plans built for every level of program.</p>
+            <p className="text-gray-400">
+              A one-time build to stand your system up, then a small monthly to keep it running.
+            </p>
           </div>
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {tiers.map((tier, i) => (
@@ -361,8 +369,13 @@ export default function Landing() {
                 <h3 className="text-xl font-bold mb-1">{tier.name}</h3>
                 <p className="text-sm text-gray-400 mb-4">{tier.description}</p>
                 <div className="mb-6">
-                  <span className="text-4xl font-bold">${tier.price}</span>
-                  <span className="text-gray-400">/mo</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-bold">${tier.setup.toLocaleString()}</span>
+                    <span className="text-sm text-gray-400">one-time build</span>
+                  </div>
+                  <div className="mt-1 text-sm text-gray-400">
+                    then <span className="font-semibold text-gray-200">${tier.price}</span>/month
+                  </div>
                 </div>
                 <ul className="space-y-3 mb-8">
                   {tier.features.map(feature => (

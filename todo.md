@@ -77,3 +77,8 @@ Basketball version of TacticalEdge AI (football scouting app), mirroring its str
 - [x] "Build from film" CTA + FROM YOUR FILM badge when real possessions exist
 - [x] XP reward for rebuilding possessions from film
 - [x] Vitest coverage for possessions router guards + window clamping (10 tests)
+
+## Pricing Model Update (Aug 2026)
+- [x] Landing page pricing switched to setup-fee + monthly model
+- [x] Basic Build ($3,000 + $70/mo), Full Program ($10,000 + $150/mo), Finnese Package ($20,000 + $500/mo)
+- [x] District exclusivity added to top tier
