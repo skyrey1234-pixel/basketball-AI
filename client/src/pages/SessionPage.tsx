@@ -6,14 +6,14 @@ import FilmBreakdown from "@/components/film/FilmBreakdown";
 import PlayerProfiles from "@/components/players/PlayerProfiles";
 import GamePlanGenerator from "@/components/gameplan/GamePlanGenerator";
 import MatchupScreen from "@/components/matchup/MatchupScreen";
+import TimeMachine from "@/components/timemachine/TimeMachine";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, RefreshCw, FileText, Clapperboard, Users, Swords, Shield } from "lucide-react";
+import { ArrowLeft, Loader2, RefreshCw, FileText, Clapperboard, Users, Swords, Shield, Rewind, Crosshair } from "lucide-react";
 import AttackPackage from "@/components/attack/AttackPackage";
-import { Crosshair } from "lucide-react";
 
 export default function SessionPage() {
   const params = useParams<{ id: string }>();
@@ -145,6 +145,9 @@ export default function SessionPage() {
               <TabsTrigger value="attack" className="gap-2">
                 <Crosshair className="h-4 w-4" /> Attack Package
               </TabsTrigger>
+              <TabsTrigger value="timemachine" className="gap-2">
+                <Rewind className="h-4 w-4" /> Time Machine
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="report">
@@ -164,6 +167,19 @@ export default function SessionPage() {
             </TabsContent>
             <TabsContent value="attack">
               <AttackPackage sessionId={sessionId} opponentName={session.opponentName} />
+            </TabsContent>
+            <TabsContent value="timemachine">
+              <div className="mb-5">
+                <h2 className="text-lg font-bold flex items-center gap-2">
+                  <Rewind className="h-5 w-5 text-[#FF7A1A]" /> Time Machine
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
+                  Stand inside the possession and relive the decision. Run it, freeze at the moment of
+                  the read, then reveal the open teammate you missed — the pass you actually made in
+                  red, the better read in green.
+                </p>
+              </div>
+              <TimeMachine />
             </TabsContent>
           </Tabs>
         )}
