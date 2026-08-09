@@ -82,3 +82,12 @@ Basketball version of TacticalEdge AI (football scouting app), mirroring its str
 - [x] Landing page pricing switched to setup-fee + monthly model
 - [x] Basic Build ($3,000 + $70/mo), Full Program ($10,000 + $150/mo), Finnese Package ($20,000 + $500/mo)
 - [x] District exclusivity added to top tier
+
+## GitHub Repo Integrations (Aug 2026)
+- [x] Shot Chart Tracker (DunkVision-inspired): interactive court click-to-log shots, real-time heat map, zone breakdown, quarter stats, hot/cold zones (/shot-chart)
+- [x] AI Form Coach (Flick-inspired): video URL input, AI biomechanical analysis, score rings for stance/release/follow-through/balance, drills, NBA comparison (/form-coach)
+- [x] Highlight Reel Generator (shotcut-inspired): AI selects 8 key moments from session film, coaching points per clip, type tags (/highlight-reel)
+- [x] Shot Detection Analytics (Basketball-Shot-Detector-Tracker inspired): AI shot zone breakdown, FG%/3PT%/2PT%, hot/cold zones, quarter timeline, key patterns, defensive recommendation (/shot-detection)
+- [x] 4 new DB tables: shot_charts, form_analyses, highlight_reels, shot_detection_reports
+- [x] 4 new backend routers: shotChart, formCoach, highlightReel, shotDetection
+- [x] 4 new pages wired into sidebar navigation

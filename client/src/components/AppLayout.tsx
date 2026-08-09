@@ -4,7 +4,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Target, Plus, LayoutDashboard, TrendingUp, Gamepad2, LogOut, Loader2 } from "lucide-react";
+import { Target, Plus, LayoutDashboard, TrendingUp, Gamepad2, LogOut, Loader2, Activity, Clapperboard, Radar, Dumbbell } from "lucide-react";
 import { Crosshair, PenTool, IdCard } from "lucide-react";
 
 const navItems = [
@@ -15,6 +15,10 @@ const navItems = [
   { path: "/coach-style", label: "Coach Style Mode", icon: Crosshair },
   { path: "/play-designer", label: "Play Designer", icon: PenTool },
   { path: "/coach-card", label: "Coach Card", icon: IdCard },
+  { path: "/shot-chart", label: "Shot Chart", icon: Activity },
+  { path: "/highlight-reel", label: "Highlight Reel", icon: Clapperboard },
+  { path: "/shot-detection", label: "Shot Detection", icon: Radar },
+  { path: "/form-coach", label: "Form Coach", icon: Dumbbell },
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {

@@ -228,4 +228,50 @@ export const possessions = mysqlTable("possessions", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
+// Shot Chart — DunkVision-inspired live shot logging
+export const shotCharts = mysqlTable("shot_charts", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  sessionId: int("sessionId"),
+  teamName: varchar("teamName", { length: 255 }).notNull(),
+  opponentName: varchar("opponentName", { length: 255 }),
+  gameDate: varchar("gameDate", { length: 32 }),
+  shotsJson: text("shotsJson").notNull().default("[]"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+// Form Analysis — Flick-inspired AI shooting form coach
+export const formAnalyses = mysqlTable("form_analyses", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  sessionId: int("sessionId"),
+  playerName: varchar("playerName", { length: 255 }),
+  videoUrl: text("videoUrl"),
+  analysisJson: text("analysisJson"),
+  status: mysqlEnum("status", ["pending", "analyzing", "complete", "error"]).default("pending"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+// Highlight Reels — shotcut-inspired
+export const highlightReels = mysqlTable("highlight_reels", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionId: int("sessionId").notNull(),
+  userId: int("userId").notNull(),
+  title: varchar("title", { length: 255 }),
+  momentsJson: text("momentsJson"),
+  status: mysqlEnum("status", ["pending", "generating", "complete", "error"]).default("pending"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+// Shot Detection Analytics — Basketball-Shot-Detector-Tracker inspired
+export const shotDetectionReports = mysqlTable("shot_detection_reports", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionId: int("sessionId").notNull(),
+  userId: int("userId").notNull(),
+  analyticsJson: text("analyticsJson"),
+  status: mysqlEnum("status", ["pending", "analyzing", "complete", "error"]).default("pending"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
 export type PossessionRow = typeof possessions.$inferSelect;

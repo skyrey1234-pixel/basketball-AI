@@ -13,6 +13,10 @@ import ScoutingChallenge from "./pages/ScoutingChallenge";
 import CoachStyleMode from "./pages/CoachStyleMode";
 import CoachCard from "./pages/CoachCard";
 import PlayDesigner from "./pages/PlayDesigner";
+import ShotChart from "./pages/ShotChart";
+import FormCoach from "./pages/FormCoach";
+import HighlightReel from "./pages/HighlightReel";
+import ShotDetection from "./pages/ShotDetection";
 function Router() {
   return (
     <Switch>
@@ -24,7 +28,11 @@ function Router() {
       <Route path={"/coach-style"} component={CoachStyleMode} />
       <Route path={"/coach-card"} component={CoachCard} />
       <Route path={"/play-designer"} component={PlayDesigner} />
-      <Route path={"/session/:id"} component={SessionPage} />
+  <Route path={"/session/:id"} component={SessionPage} />
+      <Route path={"/shot-chart"} component={ShotChart} />
+      <Route path={"/form-coach"} component={FormCoach} />
+      <Route path={"/highlight-reel"} component={HighlightReel} />
+      <Route path={"/shot-detection"} component={ShotDetection} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

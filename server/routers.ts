@@ -15,7 +15,10 @@ import { dnaRouter } from "./routers/dna";
 import { progressRouter } from "./routers/progress";
 import { playbookRouter } from "./routers/playbook";
 import { resultsRouter } from "./routers/results";
-
+import { shotChartRouter } from "./routers/shotChart";
+import { formCoachRouter } from "./routers/formCoach";
+import { highlightReelRouter } from "./routers/highlightReel";
+import { shotDetectionRouter } from "./routers/shotDetection";
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
@@ -43,6 +46,10 @@ export const appRouter = router({
   progress: progressRouter,
   playbook: playbookRouter,
   results: resultsRouter,
+  shotChart: shotChartRouter,
+  formCoach: formCoachRouter,
+  highlightReel: highlightReelRouter,
+  shotDetection: shotDetectionRouter,
 });
 
 export type AppRouter = typeof appRouter;
