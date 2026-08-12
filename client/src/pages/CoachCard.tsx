@@ -96,7 +96,8 @@ export default function CoachCard() {
 
         {/* ---- the card ---- */}
         <div
-          className="relative rounded-2xl border-2 overflow-hidden"
+          className="relative rounded-2xl border-2 overflow-hidden gold-glow-strong"
+          tabIndex={0}
           style={{
             borderColor: style.ring,
             background: "linear-gradient(155deg,#2b1249 0%,#180a2b 50%,#100719 100%)",
@@ -150,7 +151,8 @@ export default function CoachCard() {
               </div>
 
               <div
-                className="shrink-0 flex flex-col items-center justify-center rounded-xl px-5 py-3"
+                className="shrink-0 flex flex-col items-center justify-center rounded-xl px-5 py-3 gold-glow-strong"
+                tabIndex={0}
                 style={{
                   background: `linear-gradient(160deg,${style.ring}33,${style.ring}0d)`,
                   border: `2px solid ${style.ring}`,
@@ -262,7 +264,8 @@ export default function CoachCard() {
               return (
                 <div
                   key={s.label}
-                  className="rounded-lg border border-white/[0.07] bg-white/[0.02] px-3 py-3 text-center"
+                  className="rounded-lg border border-white/[0.07] bg-white/[0.02] px-3 py-3 text-center gold-glow"
+                  tabIndex={0}
                   style={{
                     animation: `statIn 420ms cubic-bezier(0.23,1,0.32,1) ${i * 60}ms both`,
                   }}
@@ -293,7 +296,8 @@ export default function CoachCard() {
               return (
                 <div
                   key={b.id}
-                  className="rounded-lg border px-3 py-3 flex items-start gap-3"
+                  className="rounded-lg border px-3 py-3 flex items-start gap-3 gold-glow"
+                  tabIndex={0}
                   style={{
                     borderColor: has ? "rgba(253,185,39,0.45)" : "rgba(255,255,255,0.06)",
                     background: has ? "linear-gradient(120deg,rgba(85,37,131,0.26),rgba(253,185,39,0.08))" : "rgba(255,255,255,0.015)",

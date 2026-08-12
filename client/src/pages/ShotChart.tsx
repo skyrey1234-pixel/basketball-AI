@@ -49,16 +49,31 @@ export default function ShotChart() {
   const [shotMode, setShotMode] = useState<"made" | "missed">("made");
   const [selectedPlayer, setSelectedPlayer] = useState("Team");
   const [selectedQuarter, setSelectedQuarter] = useState(1);
+  const [filterPlayer, setFilterPlayer] = useState<string>("all");
+  const [filterQuarter, setFilterQuarter] = useState<number | "all">("all");
+  const [filterSessionId, setFilterSessionId] = useState<number | "all">("all");
   const courtRef = useRef<HTMLDivElement>(null);
 
   const { data: charts, refetch } = trpc.shotChart.list.useQuery();
+  const { data: filterOptions } = trpc.shotChart.filterOptions.useQuery();
   const createMut = trpc.shotChart.create.useMutation({
     onSuccess: (chart) => { setActiveChart(chart); setCreating(false); refetch(); },
   });
   const logShotMut = trpc.shotChart.logShot.useMutation();
   const undoMut = trpc.shotChart.undoShot.useMutation();
+  const linkSessionMut = trpc.shotChart.linkSession.useMutation({
+    onSuccess: () => {
+      refetch();
+      toast.success("Chart linked to session");
+    },
+    onError: e => toast.error(e.message),
+  });
   const { data: stats } = trpc.shotChart.getStats.useQuery(
-    { chartId: activeChart?.id },
+    {
+      chartId: activeChart?.id,
+      player: filterPlayer === "all" ? undefined : filterPlayer,
+      quarter: filterQuarter === "all" ? undefined : filterQuarter,
+    },
     { enabled: !!activeChart?.id, refetchInterval: 2000 }
   );
   const { data: chartData, refetch: refetchChart } = trpc.shotChart.get.useQuery(
@@ -66,7 +81,18 @@ export default function ShotChart() {
     { enabled: !!activeChart?.id, refetchInterval: 2000 }
   );
 
-  const shots: any[] = chartData?.shotsJson ? JSON.parse(chartData.shotsJson) : [];
+  const allShots: any[] = chartData?.shotsJson ? JSON.parse(chartData.shotsJson) : [];
+  const shots = allShots.filter(s => {
+    if (filterPlayer !== "all" && (s.player ?? "Team") !== filterPlayer) return false;
+    if (filterQuarter !== "all" && (s.quarter ?? 1) !== filterQuarter) return false;
+    return true;
+  });
+  const rosterOptions = Array.from(new Set(allShots.map(s => String(s.player ?? "Team")))).sort();
+
+  // Session filter narrows the chart list itself.
+  const visibleCharts = (charts ?? []).filter((c: any) =>
+    filterSessionId === "all" ? true : c.sessionId === filterSessionId
+  );
 
   const handleCourtClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!activeChart || !courtRef.current) return;
@@ -97,7 +123,7 @@ export default function ShotChart() {
             </h1>
             <p className="text-gray-400 text-sm mt-1">Click the court to log shots. Real-time heat map updates automatically.</p>
           </div>
-          <Button onClick={() => setCreating(true)} className="bg-[#FDB927] hover:bg-[#ffe08a] text-[#2b1249] font-bold shadow-[0_10px_24px_rgba(253,185,39,0.16)]">
+          <Button onClick={() => setCreating(true)} className="gold-glow bg-[#FDB927] hover:bg-[#ffe08a] text-[#2b1249] font-bold shadow-[0_10px_24px_rgba(253,185,39,0.16)]">
             + New Chart
           </Button>
         </div>
@@ -117,19 +143,47 @@ export default function ShotChart() {
           </div>
         )}
 
+        {/* Session filter for the chart list */}
+        {!activeChart && charts && charts.length > 0 && (
+          <div className="lakers-surface border border-[#76549a]/60 rounded-xl p-4 mb-6">
+            <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[#FDE68A]">Filter by Game Session</span>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button
+                onClick={() => setFilterSessionId("all")}
+                className={`gold-glow rounded-full border px-3 py-1.5 text-xs font-bold ${filterSessionId === "all" ? "border-[#FDB927] bg-[#FDB927]/15 text-[#FDE68A]" : "border-[#6b4a92]/60 bg-[#211037] text-purple-100/70"}`}
+              >
+                All Sessions
+              </button>
+              {filterOptions?.sessions.map(s => (
+                <button
+                  key={s.id}
+                  onClick={() => setFilterSessionId(s.id)}
+                  className={`gold-glow rounded-full border px-3 py-1.5 text-xs font-bold ${filterSessionId === s.id ? "border-[#FDB927] bg-[#FDB927]/15 text-[#FDE68A]" : "border-[#6b4a92]/60 bg-[#211037] text-purple-100/70"}`}
+                >
+                  vs {s.opponentName}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Past Charts List */}
         {!activeChart && charts && charts.length > 0 && (
           <div className="mb-6">
             <h2 className="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-3">Recent Charts</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {charts.slice(0, 6).map((c: any) => (
-                <div key={c.id} onClick={() => setActiveChart(c)} className="lakers-surface border border-[#6b4a92]/55 rounded-lg p-4 cursor-pointer hover:border-[#FDB927]/70 transition-colors">
-                  <div className="font-semibold text-white">{c.teamName}</div>
-                  {c.opponentName && <div className="text-gray-400 text-sm">vs {c.opponentName}</div>}
-                  <div className="text-[#FDE68A] text-xs mt-1">{new Date(c.createdAt).toLocaleDateString()}</div>
-                </div>
-              ))}
-            </div>
+            {visibleCharts.length === 0 ? (
+              <p className="text-sm text-purple-100/60">No charts linked to that session yet.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {visibleCharts.slice(0, 6).map((c: any) => (
+                  <div key={c.id} onClick={() => setActiveChart(c)} className="gold-glow lakers-surface border border-[#6b4a92]/55 rounded-lg p-4 cursor-pointer">
+                    <div className="font-semibold text-white">{c.teamName}</div>
+                    {c.opponentName && <div className="text-gray-400 text-sm">vs {c.opponentName}</div>}
+                    <div className="text-[#FDE68A] text-xs mt-1">{new Date(c.createdAt).toLocaleDateString()}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -144,18 +198,97 @@ export default function ShotChart() {
                     {activeChart.opponentName && <span className="text-gray-400 text-sm ml-2">vs {activeChart.opponentName}</span>}
                   </div>
                   <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={handleUndo} className="border-[#76549a]/70 text-purple-100 text-xs">↩ Undo</Button>
-                    <Button size="sm" variant="outline" onClick={() => setActiveChart(null)} className="border-[#76549a]/70 text-purple-100 text-xs">← Back</Button>
+                    <Button size="sm" variant="outline" onClick={handleUndo} className="gold-glow border-[#76549a]/70 text-purple-100 text-xs">↩ Undo</Button>
+                    <Button size="sm" variant="outline" onClick={() => setActiveChart(null)} className="gold-glow border-[#76549a]/70 text-purple-100 text-xs">← Back</Button>
+                  </div>
+                </div>
+
+                {/* Logging identity: which player these clicks belong to */}
+                <div className="mb-3 flex flex-wrap items-end gap-3">
+                  <div className="min-w-[180px]">
+                    <span className="block text-[10px] font-black uppercase tracking-[0.16em] text-[#FDE68A]">Logging Shots For</span>
+                    <Input
+                      value={selectedPlayer}
+                      onChange={e => setSelectedPlayer(e.target.value || "Team")}
+                      placeholder="Player name or Team"
+                      className="mt-1 h-8 bg-[#190c2b] border-[#76549a]/70 text-white text-sm"
+                    />
+                  </div>
+                  <div className="min-w-[220px]">
+                    <span className="block text-[10px] font-black uppercase tracking-[0.16em] text-[#FDE68A]">Linked Session</span>
+                    <div className="mt-1 flex flex-wrap gap-1.5">
+                      {filterOptions?.sessions.slice(0, 4).map(s => {
+                        const linked = (activeChart.sessionId ?? null) === s.id;
+                        return (
+                          <button
+                            key={s.id}
+                            onClick={() => {
+                              const next = linked ? null : s.id;
+                              setActiveChart({ ...activeChart, sessionId: next });
+                              linkSessionMut.mutate({ chartId: activeChart.id, sessionId: next });
+                            }}
+                            className={`gold-glow rounded-full border px-2.5 py-1 text-[11px] font-bold ${linked ? "border-[#FDB927] bg-[#FDB927]/15 text-[#FDE68A]" : "border-[#6b4a92]/60 bg-[#211037] text-purple-100/70"}`}
+                          >
+                            vs {s.opponentName}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
 
                 {/* Shot Mode Toggle */}
                 <div className="flex gap-2 mb-3">
-                  <button onClick={() => setShotMode("made")} className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${shotMode === "made" ? "bg-green-500 text-white" : "bg-[#211037] text-purple-100/65 hover:bg-[#30184c]"}`}>✓ Made</button>
-                  <button onClick={() => setShotMode("missed")} className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${shotMode === "missed" ? "bg-red-500 text-white" : "bg-[#211037] text-purple-100/65 hover:bg-[#30184c]"}`}>✗ Missed</button>
+                  <button onClick={() => setShotMode("made")} className={`gold-glow px-4 py-1.5 rounded-full text-sm font-semibold ${shotMode === "made" ? "bg-green-500 text-white" : "bg-[#211037] text-purple-100/65"}`}>✓ Made</button>
+                  <button onClick={() => setShotMode("missed")} className={`gold-glow px-4 py-1.5 rounded-full text-sm font-semibold ${shotMode === "missed" ? "bg-red-500 text-white" : "bg-[#211037] text-purple-100/65"}`}>✗ Missed</button>
                   {[1,2,3,4].map(q => (
-                    <button key={q} onClick={() => setSelectedQuarter(q)} className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-all ${selectedQuarter === q ? "bg-[#FDB927] text-[#2b1249]" : "bg-[#211037] text-purple-100/65 hover:bg-[#30184c]"}`}>Q{q}</button>
+                    <button key={q} onClick={() => setSelectedQuarter(q)} className={`gold-glow px-3 py-1.5 rounded-full text-sm font-semibold ${selectedQuarter === q ? "bg-[#FDB927] text-[#2b1249]" : "bg-[#211037] text-purple-100/65"}`}>Q{q}</button>
                   ))}
+                </div>
+
+                {/* View filters: player + quarter */}
+                <div className="mb-3 rounded-lg border border-[#76549a]/45 bg-[#190c2b]/60 p-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[#FDE68A]">View Player</span>
+                    <button
+                      onClick={() => setFilterPlayer("all")}
+                      className={`gold-glow rounded-full border px-3 py-1 text-xs font-bold ${filterPlayer === "all" ? "border-[#FDB927] bg-[#FDB927]/15 text-[#FDE68A]" : "border-[#6b4a92]/60 bg-[#211037] text-purple-100/70"}`}
+                    >
+                      All Players
+                    </button>
+                    {rosterOptions.map(p => (
+                      <button
+                        key={p}
+                        onClick={() => setFilterPlayer(p)}
+                        className={`gold-glow rounded-full border px-3 py-1 text-xs font-bold ${filterPlayer === p ? "border-[#FDB927] bg-[#FDB927]/15 text-[#FDE68A]" : "border-[#6b4a92]/60 bg-[#211037] text-purple-100/70"}`}
+                      >
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[#FDE68A]">View Quarter</span>
+                    <button
+                      onClick={() => setFilterQuarter("all")}
+                      className={`gold-glow rounded-full border px-3 py-1 text-xs font-bold ${filterQuarter === "all" ? "border-[#FDB927] bg-[#FDB927]/15 text-[#FDE68A]" : "border-[#6b4a92]/60 bg-[#211037] text-purple-100/70"}`}
+                    >
+                      All
+                    </button>
+                    {[1, 2, 3, 4].map(q => (
+                      <button
+                        key={q}
+                        onClick={() => setFilterQuarter(q)}
+                        className={`gold-glow rounded-full border px-3 py-1 text-xs font-bold ${filterQuarter === q ? "border-[#FDB927] bg-[#FDB927]/15 text-[#FDE68A]" : "border-[#6b4a92]/60 bg-[#211037] text-purple-100/70"}`}
+                      >
+                        Q{q}
+                      </button>
+                    ))}
+                    {(filterPlayer !== "all" || filterQuarter !== "all") && (
+                      <span className="ml-auto text-[11px] text-purple-100/70">
+                        Showing {shots.length} of {allShots.length} shots
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Basketball Court */}

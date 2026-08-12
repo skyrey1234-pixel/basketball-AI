@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
+import LakersOverlayPreview from "@/components/highlight/LakersOverlayPreview";
+import { renderOverlayCardBlob } from "@/lib/renderOverlayCard";
 
 const TYPE_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
   great_play:     { label: "Great Play",      color: "bg-green-500/20 text-green-300 border-green-500/30",   icon: "⭐" },
@@ -18,9 +22,41 @@ function formatTime(seconds: number) {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
+const ACCENT_STYLES = [
+  { id: "showtime", label: "Showtime" },
+  { id: "midnight", label: "Midnight" },
+  { id: "hardwood", label: "Hardwood" },
+] as const;
+
+type AccentStyle = (typeof ACCENT_STYLES)[number]["id"];
+
+function downloadFile(filename: string, contents: string, mime: string) {
+  const blob = new Blob([contents], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function toSrtTimestamp(seconds: number) {
+  const total = Math.max(0, Math.floor(seconds));
+  const h = String(Math.floor(total / 3600)).padStart(2, "0");
+  const m = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
+  const s = String(total % 60).padStart(2, "0");
+  return `${h}:${m}:${s},000`;
+}
+
 export default function HighlightReel() {
   const [selectedSession, setSelectedSession] = useState<number | null>(null);
   const [reelId, setReelId] = useState<number | null>(null);
+  const [teamName, setTeamName] = useState("");
+  const [accentStyle, setAccentStyle] = useState<AccentStyle>("showtime");
+  const [showExport, setShowExport] = useState(false);
+  const [renderingCards, setRenderingCards] = useState(false);
 
   const { data: sessions } = trpc.sessions.list.useQuery();
   const generateMut = trpc.highlightReel.generate.useMutation({
@@ -37,6 +73,58 @@ export default function HighlightReel() {
 
   const activeMoments = reel?.moments || existingReel?.moments || [];
   const isGenerating = reel?.status === "generating" || generateMut.isPending;
+  const activeReelId = reel?.id ?? existingReel?.id ?? null;
+
+  const { data: exportPkg, isFetching: exportLoading } = trpc.highlightReel.exportPackage.useQuery(
+    { id: activeReelId!, teamName: teamName.trim() || undefined, accentStyle },
+    { enabled: showExport && !!activeReelId }
+  );
+
+  const exportFiles = useMemo(() => {
+    if (!exportPkg) return null;
+    const slug = (exportPkg.teamName || "courtvision").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+    const srt = exportPkg.clips
+      .map((c, i) => `${i + 1}\n${toSrtTimestamp(c.startSeconds)} --> ${toSrtTimestamp(c.endSeconds)}\n${c.overlay.topLeft} | ${c.label}\n${c.coachingPoint}\n`)
+      .join("\n");
+
+    const csv = [
+      "clip,label,type,start_seconds,end_seconds,duration_seconds,timecode,coaching_point",
+      ...exportPkg.clips.map(c =>
+        [c.clipNumber, c.label, c.type, c.startSeconds, c.endSeconds, c.durationSeconds, c.timecode, c.coachingPoint]
+          .map(v => `"${String(v).replace(/"/g, '""')}"`)
+          .join(",")
+      ),
+    ].join("\n");
+
+    return { slug, srt, csv, json: JSON.stringify(exportPkg, null, 2) };
+  }, [exportPkg]);
+
+  async function handleDownloadCards() {
+    if (!exportPkg) return;
+    setRenderingCards(true);
+    try {
+      let saved = 0;
+      for (const clip of exportPkg.clips) {
+        const blob = await renderOverlayCardBlob(clip);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${(exportPkg.teamName || "courtvision").toLowerCase().replace(/[^a-z0-9]+/g, "-")}-clip-${String(clip.clipNumber).padStart(2, "0")}.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        saved += 1;
+        await new Promise(r => setTimeout(r, 120));
+      }
+      toast.success(`${saved} branded overlay card${saved === 1 ? "" : "s"} downloaded`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not render overlay cards");
+    } finally {
+      setRenderingCards(false);
+    }
+  }
 
   return (
     <DashboardLayout>
@@ -97,8 +185,119 @@ export default function HighlightReel() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-white font-bold">Highlight Moments ({activeMoments.length})</h2>
-              <Badge className="bg-[#FDB927]/15 text-[#FDE68A] border-[#FDB927]/30">Ready for Film Review</Badge>
+              <div className="flex items-center gap-2">
+                <Badge className="bg-[#FDB927]/15 text-[#FDE68A] border-[#FDB927]/30">Ready for Film Review</Badge>
+                <Button
+                  size="sm"
+                  onClick={() => setShowExport(v => !v)}
+                  disabled={!activeReelId}
+                  className="gold-glow bg-[#FDB927] hover:bg-[#ffe08a] text-[#2b1249] font-bold"
+                >
+                  {showExport ? "Hide Export" : "🎨 Export with Lakers Overlay"}
+                </Button>
+              </div>
             </div>
+
+            {/* Lakers-themed export panel */}
+            {showExport && (
+              <div className="lakers-surface border border-[#FDB927]/35 rounded-xl p-4 shadow-[inset_0_1px_0_rgba(253,185,39,0.14)]">
+                <div className="flex flex-wrap items-end gap-4">
+                  <div className="min-w-[200px] flex-1">
+                    <label className="text-[10px] font-black uppercase tracking-[0.16em] text-[#FDE68A]">Team Lockup</label>
+                    <Input
+                      value={teamName}
+                      onChange={e => setTeamName(e.target.value)}
+                      placeholder="e.g. Ribault Trojans"
+                      className="mt-1 bg-[#190c2b] border-[#76549a]/70 text-white"
+                    />
+                  </div>
+                  <div>
+                    <span className="block text-[10px] font-black uppercase tracking-[0.16em] text-[#FDE68A]">Overlay Style</span>
+                    <div className="mt-1 flex gap-2">
+                      {ACCENT_STYLES.map(s => (
+                        <button
+                          key={s.id}
+                          onClick={() => setAccentStyle(s.id)}
+                          className={`gold-glow rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-wide ${
+                            accentStyle === s.id
+                              ? "border-[#FDB927] bg-[#FDB927]/15 text-[#FDE68A]"
+                              : "border-[#6b4a92]/60 bg-[#211037] text-purple-100/70"
+                          }`}
+                        >
+                          {s.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {exportLoading && <p className="mt-4 text-sm text-purple-100/70">Building export package…</p>}
+
+                {exportPkg && exportFiles && (
+                  <>
+                    <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      {exportPkg.clips.slice(0, 6).map(c => (
+                        <LakersOverlayPreview key={c.clipNumber} clip={c} />
+                      ))}
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap items-center gap-2">
+                      <span className="text-xs text-purple-100/70">
+                        {exportPkg.totalClips} clips · {exportPkg.totalRuntimeSeconds}s runtime · {exportPkg.theme.label}
+                      </span>
+                      <div className="ml-auto flex flex-wrap gap-2">
+                        <Button
+                          size="sm"
+                          disabled={renderingCards}
+                          onClick={handleDownloadCards}
+                          className="gold-glow bg-[#FDB927] hover:bg-[#ffe08a] text-[#2b1249] font-bold"
+                        >
+                          {renderingCards ? "Rendering cards…" : "⬇ Overlay Cards (PNG)"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gold-glow bg-[#FDB927] hover:bg-[#ffe08a] text-[#2b1249] font-bold"
+                          onClick={() => {
+                            downloadFile(`${exportFiles.slug}-overlay-package.json`, exportFiles.json, "application/json");
+                            toast.success("Overlay package downloaded");
+                          }}
+                        >
+                          ⬇ Overlay Package (JSON)
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gold-glow border-[#76549a]/70 text-purple-100"
+                          onClick={() => {
+                            downloadFile(`${exportFiles.slug}-clip-titles.srt`, exportFiles.srt, "application/x-subrip");
+                            toast.success("Burn-in titles downloaded");
+                          }}
+                        >
+                          ⬇ Burn-in Titles (SRT)
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gold-glow border-[#76549a]/70 text-purple-100"
+                          onClick={() => {
+                            downloadFile(`${exportFiles.slug}-cut-list.csv`, exportFiles.csv, "text/csv");
+                            toast.success("Cut list downloaded");
+                          }}
+                        >
+                          ⬇ Cut List (CSV)
+                        </Button>
+                      </div>
+                    </div>
+                    <p className="mt-2 text-[11px] text-purple-100/55">
+                      Drop the SRT and cut list into your editor to burn these exact purple-and-gold titles onto each clip.
+                      The JSON package carries every overlay field, timecode, and theme color.
+                    </p>
+                  </>
+                )}
+              </div>
+            )}
+
             {activeMoments.map((moment: any, i: number) => {
               const cfg = TYPE_CONFIG[moment.type] || TYPE_CONFIG.teachable;
               return (

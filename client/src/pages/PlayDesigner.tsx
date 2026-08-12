@@ -180,7 +180,7 @@ export default function PlayDesigner() {
             <div className="flex flex-wrap items-center gap-2 mb-3">
               <button
                 onClick={() => setTool("move")}
-                className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wide border transition-all active:scale-[0.97]"
+                className="gold-glow inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wide border"
                 style={{
                   borderColor: tool === "move" ? "#FDB927" : "rgba(253,185,39,0.12)",
                   background: tool === "move" ? "rgba(253,185,39,0.14)" : "transparent",
@@ -194,7 +194,7 @@ export default function PlayDesigner() {
                 <button
                   key={k}
                   onClick={() => setTool(k)}
-                  className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wide border transition-all active:scale-[0.97]"
+                  className="gold-glow inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wide border"
                   style={{
                     borderColor: tool === k ? ROUTE_STYLES[k].color : "rgba(255,255,255,0.08)",
                     background: tool === k ? `${ROUTE_STYLES[k].color}22` : "transparent",
@@ -212,20 +212,20 @@ export default function PlayDesigner() {
 
               <div className="ml-auto flex items-center gap-2">
                 {drawingFrom && (
-                  <Button size="sm" onClick={finishRoute} className="h-7 text-[11px] font-bold">
+                  <Button size="sm" onClick={finishRoute} className="gold-glow h-7 text-[11px] font-bold">
                     Finish Route ({draftPoints.length})
                   </Button>
                 )}
                 <Button
                   size="sm"
                   variant="outline"
-                  className="h-7 text-[11px]"
+                  className="gold-glow h-7 text-[11px]"
                   onClick={() => setRoutes(r => r.slice(0, -1))}
                   disabled={routes.length === 0}
                 >
                   <Undo2 className="h-3 w-3" /> Undo
                 </Button>
-                <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={reset}>
+                <Button size="sm" variant="outline" className="gold-glow h-7 text-[11px]" onClick={reset}>
                   <Eraser className="h-3 w-3" /> Reset
                 </Button>
               </div>
@@ -437,7 +437,7 @@ export default function PlayDesigner() {
 
               <div className="flex gap-2 pt-1">
                 <Button
-                  className="flex-1 font-bold"
+                  className="gold-glow flex-1 font-bold"
                   onClick={() => gradePlay.mutate(payload)}
                   disabled={gradePlay.isPending}
                 >
@@ -453,6 +453,7 @@ export default function PlayDesigner() {
                 </Button>
                 <Button
                   variant="outline"
+                  className="gold-glow"
                   onClick={() => savePlay.mutate(payload)}
                   disabled={savePlay.isPending || !name.trim()}
                 >
@@ -572,7 +573,7 @@ export default function PlayDesigner() {
                   {savedPlays.map(p => (
                     <div
                       key={p.id}
-                      className="flex items-center justify-between gap-2 rounded-md border border-white/[0.06] bg-white/[0.02] px-2.5 py-2"
+                      className="gold-glow flex items-center justify-between gap-2 rounded-md border border-white/[0.06] bg-white/[0.02] px-2.5 py-2"
                     >
                       <button
                         className="min-w-0 text-left flex-1"

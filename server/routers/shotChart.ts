@@ -91,14 +91,23 @@ export const shotChartRouter = router({
     }),
 
   getStats: protectedProcedure
-    .input(z.object({ chartId: z.number() }))
+    .input(z.object({
+      chartId: z.number(),
+      player: z.string().optional(),
+      quarter: z.number().int().min(1).max(4).optional(),
+    }))
     .query(async ({ ctx, input }) => {
       const drizzle = await db.getDb();
       if (!drizzle) throw new Error("DB unavailable");
       const [chart] = await drizzle.select().from(shotCharts)
         .where(and(eq(shotCharts.id, input.chartId), eq(shotCharts.userId, ctx.user.id)));
       if (!chart) throw new Error("Shot chart not found");
-      const shots: any[] = JSON.parse(chart.shotsJson || "[]");
+      const allShots: any[] = JSON.parse(chart.shotsJson || "[]");
+      const shots = allShots.filter(s => {
+        if (input.player && (s.player ?? "Team") !== input.player) return false;
+        if (input.quarter && (s.quarter ?? 1) !== input.quarter) return false;
+        return true;
+      });
       const total = shots.length;
       const made = shots.filter(s => s.made).length;
       const zones: Record<string, { made: number; total: number }> = {};
@@ -122,7 +131,47 @@ export const shotChartRouter = router({
         total, made, missed: total - made,
         pct: total > 0 ? Math.round((made / total) * 100) : 0,
         zones, hotZones, coldZones, byQuarter,
+        unfilteredTotal: allShots.length,
+        players: Array.from(new Set(allShots.map(s => String(s.player ?? "Team")))).sort(),
       };
+    }),
+
+  /** Charts grouped for the session filter, plus the sessions they can be linked to. */
+  filterOptions: protectedProcedure.query(async ({ ctx }) => {
+    const drizzle = await db.getDb();
+    if (!drizzle) return { charts: [], sessions: [] };
+    const charts = await drizzle.select().from(shotCharts)
+      .where(eq(shotCharts.userId, ctx.user.id))
+      .orderBy(desc(shotCharts.createdAt));
+    const sessions = await db.listSessions(ctx.user.id);
+    return {
+      charts: charts.map(c => ({
+        id: c.id,
+        teamName: c.teamName,
+        opponentName: c.opponentName,
+        sessionId: c.sessionId,
+        createdAt: c.createdAt,
+        players: Array.from(
+          new Set((JSON.parse(c.shotsJson || "[]") as any[]).map(s => String(s.player ?? "Team")))
+        ).sort(),
+      })),
+      sessions: sessions.map(s => ({ id: s.id, opponentName: s.opponentName, status: s.status })),
+    };
+  }),
+
+  /** Link an existing chart to a scouting session so charts can be filtered by session. */
+  linkSession: protectedProcedure
+    .input(z.object({ chartId: z.number(), sessionId: z.number().nullable() }))
+    .mutation(async ({ ctx, input }) => {
+      const drizzle = await db.getDb();
+      if (!drizzle) throw new Error("DB unavailable");
+      const [chart] = await drizzle.select().from(shotCharts)
+        .where(and(eq(shotCharts.id, input.chartId), eq(shotCharts.userId, ctx.user.id)));
+      if (!chart) throw new Error("Shot chart not found");
+      await drizzle.update(shotCharts)
+        .set({ sessionId: input.sessionId })
+        .where(eq(shotCharts.id, input.chartId));
+      return { success: true };
     }),
 
   delete: protectedProcedure

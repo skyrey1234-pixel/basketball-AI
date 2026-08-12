@@ -41,7 +41,15 @@ Basketball version of TacticalEdge AI (football scouting app), mirroring its str
 - [x] Checkpoint saved (version 2b80beee)
 
 ## Deferred (needs user input)
-- [ ] [DEFERRED — needs user Stripe key] Stripe subscription tiers (Scout $99 / Strategist $199 / Program $499) — requires Stripe integration setup; game plan gating included in-code with free access until Stripe is connected
+- [ ] [BLOCKED — user Stripe key required] Implement checkout and recurring subscriptions for the current Basic Build ($3,000 + $70/mo), Full Program ($10,000 + $150/mo), and Finnese Package ($20,000 + $500/mo) model.
+- [x] Documented the payment blocker: checkout remains intentionally unwired until the user provides Stripe credentials and approves payment integration.
+
+## Interaction & Feature Upgrades (Aug 2026)
+- [x] Gold glow hover/focus effect on Coach Card interactive elements
+- [x] Gold glow hover/focus effect on Play Designer buttons and tool controls
+- [x] Highlight Reel clip export with custom Lakers-themed overlay (branded card + downloadable output)
+- [x] Shot Chart filtering by player and by linked game session, with filtered stats and heat map
+- [x] Vitest coverage for shot filtering logic and overlay export timestamp formatting (42 tests passing)
 
 ## New Features (in progress)
 - [x] Full React Three Fiber 3D court play diagrams (replace flat SVG PlayCourtDiagram)

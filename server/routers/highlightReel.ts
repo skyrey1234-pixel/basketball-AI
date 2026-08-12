@@ -105,4 +105,78 @@ Return a JSON array of 8 moments:
       .where(eq(highlightReels.userId, ctx.user.id))
       .orderBy(desc(highlightReels.createdAt));
   }),
+
+  /**
+   * Build an export package for a reel: Lakers-themed overlay metadata per clip
+   * plus the source film reference, so the client can render/download it.
+   */
+  exportPackage: protectedProcedure
+    .input(z.object({
+      id: z.number(),
+      teamName: z.string().max(40).optional(),
+      accentStyle: z.enum(["showtime", "midnight", "hardwood"]).default("showtime"),
+      momentIndexes: z.array(z.number().int().nonnegative()).optional(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const drizzle = await db.getDb();
+      if (!drizzle) throw new Error("DB unavailable");
+
+      const [reel] = await drizzle.select().from(highlightReels)
+        .where(and(eq(highlightReels.id, input.id), eq(highlightReels.userId, ctx.user.id)));
+      if (!reel) throw new Error("Highlight reel not found");
+
+      const session = await db.getSession(reel.sessionId);
+      const allMoments: any[] = reel.momentsJson ? JSON.parse(reel.momentsJson) : [];
+      const picked = input.momentIndexes?.length
+        ? input.momentIndexes.filter(i => i < allMoments.length).map(i => ({ index: i, moment: allMoments[i] }))
+        : allMoments.map((moment, index) => ({ index, moment }));
+
+      const themes = {
+        showtime: { primary: "#552583", accent: "#FDB927", text: "#FFFFFF", label: "Showtime Purple & Gold" },
+        midnight: { primary: "#1B0B2E", accent: "#FDE68A", text: "#F5F3FF", label: "Midnight Film Room" },
+        hardwood: { primary: "#2B1249", accent: "#C8A96E", text: "#FFF7ED", label: "Hardwood Classic" },
+      } as const;
+      const theme = themes[input.accentStyle];
+      const team = (input.teamName || "CourtVision AI").trim().slice(0, 40);
+
+      const clips = picked.map(({ index, moment }) => {
+        const start = Number(moment?.timestamp ?? 0);
+        const end = Number(moment?.endTimestamp ?? start);
+        const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.max(0, Math.round(s % 60))).padStart(2, "0")}`;
+        return {
+          clipNumber: index + 1,
+          label: String(moment?.label ?? `Clip ${index + 1}`),
+          type: String(moment?.type ?? "teachable"),
+          startSeconds: start,
+          endSeconds: end,
+          durationSeconds: Math.max(1, Number(moment?.duration ?? Math.max(1, end - start))),
+          timecode: `${fmt(start)} – ${fmt(end)}`,
+          coachingPoint: String(moment?.coachingPoint ?? ""),
+          why: String(moment?.why ?? ""),
+          overlay: {
+            topLeft: team.toUpperCase(),
+            topRight: `CLIP ${String(index + 1).padStart(2, "0")}`,
+            headline: String(moment?.label ?? `Clip ${index + 1}`),
+            subhead: session ? `vs ${session.opponentName}` : "Opponent film",
+            footer: String(moment?.coachingPoint ?? "").slice(0, 120),
+            theme,
+          },
+        };
+      });
+
+      return {
+        reelId: reel.id,
+        title: reel.title ?? "Highlight Reel",
+        opponentName: session?.opponentName ?? null,
+        sourceType: session?.sourceType ?? null,
+        youtubeVideoId: session?.youtubeVideoId ?? null,
+        videoUrl: session?.videoUrl ?? null,
+        teamName: team,
+        theme,
+        totalClips: clips.length,
+        totalRuntimeSeconds: clips.reduce((acc, c) => acc + c.durationSeconds, 0),
+        clips,
+        generatedAt: new Date().toISOString(),
+      };
+    }),
 });
