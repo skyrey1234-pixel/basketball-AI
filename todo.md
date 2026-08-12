@@ -91,3 +91,9 @@ Basketball version of TacticalEdge AI (football scouting app), mirroring its str
 - [x] 4 new DB tables: shot_charts, form_analyses, highlight_reels, shot_detection_reports
 - [x] 4 new backend routers: shotChart, formCoach, highlightReel, shotDetection
 - [x] 4 new pages wired into sidebar navigation
+
+## Lakers-Inspired Visual Refresh (Aug 2026)
+- [x] Re-theme global CourtVision design tokens with deep purple, championship gold, and high-contrast white accents
+- [x] Refresh shared navigation, buttons, cards, charts, and interactive states to match the new system
+- [x] Update the landing page and core coaching workspace pages for consistent Lakers-inspired hierarchy and contrast
+- [x] Verify responsive layouts, TypeScript, tests, and visual quality before publishing

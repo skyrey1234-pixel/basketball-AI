@@ -193,7 +193,7 @@ export default function ScoutingChallenge() {
 
   const grade =
     score >= questions.length * 0.85 ? { label: "ELITE SCOUT", color: "#FFD700" }
-    : score >= questions.length * 0.6 ? { label: "VARSITY ASSISTANT", color: "#FF7A1A" }
+    : score >= questions.length * 0.6 ? { label: "VARSITY ASSISTANT", color: "#FDB927" }
     : score >= questions.length * 0.4 ? { label: "JV CLIPBOARD", color: "#60A5FA" }
     : { label: "FILM ROOM ROOKIE", color: "#9CA3AF" };
 

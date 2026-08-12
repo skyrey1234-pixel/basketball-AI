@@ -17,9 +17,9 @@ function CoachStrip() {
       <div
         className="group mb-6 rounded-xl border p-4 cursor-pointer transition-all active:scale-[0.995]"
         style={{
-          borderColor: "rgba(255,122,26,0.28)",
+          borderColor: "rgba(253,185,39,0.36)",
           background:
-            "linear-gradient(120deg,rgba(255,122,26,0.09),rgba(255,197,61,0.04) 55%,transparent)",
+            "linear-gradient(120deg,rgba(85,37,131,0.42),rgba(253,185,39,0.07) 55%,transparent)",
           transitionDuration: "180ms",
         }}
       >
@@ -27,8 +27,8 @@ function CoachStrip() {
           <div
             className="shrink-0 h-11 w-11 rounded-lg flex flex-col items-center justify-center"
             style={{
-              background: "linear-gradient(150deg,rgba(255,197,61,0.24),rgba(255,122,26,0.1))",
-              border: "1px solid rgba(255,197,61,0.45)",
+              background: "linear-gradient(150deg,rgba(253,185,39,0.22),rgba(85,37,131,0.28))",
+              border: "1px solid rgba(253,185,39,0.48)",
             }}
           >
             <span className="text-[7px] font-black uppercase tracking-wider text-yellow-500/80 leading-none">
@@ -40,8 +40,8 @@ function CoachStrip() {
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mb-1.5">
-              <Trophy className="h-3.5 w-3.5 text-orange-400 shrink-0" />
-              <span className="text-[11px] font-black uppercase tracking-[0.14em] text-orange-300">
+              <Trophy className="h-3.5 w-3.5 text-[#FDB927] shrink-0" />
+              <span className="text-[11px] font-black uppercase tracking-[0.14em] text-[#FDE68A]">
                 Coach Card
               </span>
               <span className="text-[11px] text-muted-foreground tabular-nums">
@@ -63,8 +63,8 @@ function CoachStrip() {
                 className="h-full rounded-full"
                 style={{
                   width: `${data.progress.pct}%`,
-                  background: "linear-gradient(90deg,#FF7A1A,#FFC53D)",
-                  boxShadow: "0 0 10px rgba(255,122,26,0.5)",
+                  background: "linear-gradient(90deg,#552583,#FDB927)",
+                  boxShadow: "0 0 12px rgba(253,185,39,0.42)",
                 }}
               />
             </div>
@@ -160,7 +160,7 @@ export default function Dashboard() {
             {sessions.map(session => (
               <Card
                 key={session.id}
-                className="group hover:border-primary/40 transition-colors cursor-pointer"
+                className="group hover:border-primary/60 hover:bg-primary/[0.035] transition-[border-color,background-color] cursor-pointer"
                 onClick={() => setLocation(`/session/${session.id}`)}
               >
                 <CardContent className="p-5 flex items-center justify-between gap-4">

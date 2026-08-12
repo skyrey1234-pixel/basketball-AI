@@ -17,7 +17,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-const ORANGE = "#FF7A1A";
+const GOLD = "#FDB927";
+const PURPLE = "#552583";
 
 const tiers = [
   {
@@ -25,7 +26,7 @@ const tiers = [
     setup: 3000,
     price: 70,
     icon: Zap,
-    color: "#60A5FA",
+    color: "#C4B5FD",
     description: "Core scouting, built and running for your program",
     features: [
       "AI Scouting Reports",
@@ -42,7 +43,7 @@ const tiers = [
     setup: 10000,
     price: 150,
     icon: Crown,
-    color: ORANGE,
+    color: GOLD,
     popular: true,
     description: "Every feature we build, now and as it ships",
     features: [
@@ -137,7 +138,7 @@ function HeroDiagram() {
       <path d="M 50 10 L 50 70 Q 200 230 350 70 L 350 10" fill="none" stroke="#30363D" strokeWidth="1.5" />
       {/* Hoop */}
       <line x1="180" y1="28" x2="220" y2="28" stroke="#555" strokeWidth="2" />
-      <circle cx="200" cy="38" r="8" fill="none" stroke={ORANGE} strokeWidth="2" />
+            <circle cx="200" cy="38" r="8" fill="none" stroke={GOLD} strokeWidth="2" />
 
       {/* Routes */}
       {routes.map((route, i) => (
@@ -147,7 +148,7 @@ function HeroDiagram() {
           y1={route.from.y}
           x2={route.to.x}
           y2={route.to.y}
-          stroke={ORANGE}
+          stroke={GOLD}
           strokeWidth="2"
           strokeDasharray="6 3"
           initial={{ pathLength: 0, opacity: 0 }}
@@ -161,7 +162,7 @@ function HeroDiagram() {
         <motion.polygon
           key={`arrow-${i}`}
           points={`${route.to.x},${route.to.y - 6} ${route.to.x - 4},${route.to.y + 2} ${route.to.x + 4},${route.to.y + 2}`}
-          fill={ORANGE}
+          fill={GOLD}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.8 + i * 0.3 }}
@@ -176,8 +177,8 @@ function HeroDiagram() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.15 * i, type: "spring" }}
         >
-          <circle cx={p.x} cy={p.y} r="12" fill="#0d1117" stroke={ORANGE} strokeWidth="2" />
-          <text x={p.x} y={p.y + 3.5} textAnchor="middle" fill={ORANGE} fontSize="8" fontWeight="bold">
+          <circle cx={p.x} cy={p.y} r="12" fill="#160826" stroke={GOLD} strokeWidth="2" />
+          <text x={p.x} y={p.y + 3.5} textAnchor="middle" fill={GOLD} fontSize="8" fontWeight="bold">
             {p.label}
           </text>
         </motion.g>
@@ -212,25 +213,25 @@ export default function Landing() {
   const [, setLocation] = useLocation();
 
   return (
-    <div className="min-h-screen bg-[#0d1117] text-white overflow-x-hidden">
+    <div className="min-h-screen bg-[#100719] text-white overflow-x-hidden selection:bg-[#FDB927] selection:text-[#2b1249]">
       {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0d1117]/80 backdrop-blur-xl border-b border-gray-800/50">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#100719]/85 backdrop-blur-xl border-b border-[#6b4a92]/40 shadow-[0_1px_0_rgba(253,185,39,0.1)]">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#FF7A1A]/10 flex items-center justify-center">
-              <Target className="h-4 w-4 text-[#FF7A1A]" />
+            <div className="w-8 h-8 rounded-lg border border-[#FDB927]/35 bg-[#FDB927]/10 flex items-center justify-center shadow-[0_0_18px_rgba(253,185,39,0.12)]">
+              <Target className="h-4 w-4 text-[#FDB927]" />
             </div>
             <span className="text-lg font-bold">CourtVision AI</span>
           </div>
-          <div className="flex items-center gap-4">
-            <a href="#features" className="text-sm text-gray-400 hover:text-white transition-colors">Features</a>
-            <a href="#pricing" className="text-sm text-gray-400 hover:text-white transition-colors">Pricing</a>
+          <div className="flex items-center gap-3 sm:gap-4">
+            <a href="#features" className="hidden sm:inline text-sm text-purple-200/65 hover:text-[#FDE68A] transition-colors">Features</a>
+            <a href="#pricing" className="hidden sm:inline text-sm text-purple-200/65 hover:text-[#FDE68A] transition-colors">Pricing</a>
             {isAuthenticated ? (
-              <Button size="sm" className="bg-[#FF7A1A] text-black hover:bg-[#ff8f40] font-semibold" onClick={() => setLocation("/")}>
+              <Button size="sm" className="bg-[#FDB927] text-[#2b1249] hover:bg-[#ffe08a] font-bold shadow-[0_8px_22px_rgba(253,185,39,0.18)]" onClick={() => setLocation("/")}>
                 Dashboard
               </Button>
             ) : (
-              <Button size="sm" className="bg-[#FF7A1A] text-black hover:bg-[#ff8f40] font-semibold" onClick={() => startLogin()}>
+              <Button size="sm" className="bg-[#FDB927] text-[#2b1249] hover:bg-[#ffe08a] font-bold shadow-[0_8px_22px_rgba(253,185,39,0.18)]" onClick={() => startLogin()}>
                 Sign In
               </Button>
             )}
@@ -239,13 +240,14 @@ export default function Landing() {
       </nav>
 
       {/* Hero */}
-      <section className="pt-32 pb-20 px-6">
+      <section className="relative pt-32 pb-20 px-6 overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-[32rem] bg-[radial-gradient(ellipse_at_72%_22%,rgba(85,37,131,0.55),transparent_58%)] pointer-events-none" />
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
           <div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FF7A1A]/10 border border-[#FF7A1A]/30 text-[#FF7A1A] text-xs font-semibold mb-6"
+              className="relative inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FDB927]/10 border border-[#FDB927]/35 text-[#FDE68A] text-xs font-semibold mb-6"
             >
               <Zap className="h-3 w-3" />
               AI-POWERED BASKETBALL SCOUTING
@@ -254,17 +256,17 @@ export default function Landing() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-5xl lg:text-6xl font-bold leading-tight mb-6"
+              className="relative text-5xl lg:text-6xl font-bold leading-tight mb-6"
             >
               Scout Any Opponent.
               <br />
-              <span className="text-[#FF7A1A]">Own the Court.</span>
+              <span className="text-[#FDB927]">Own the Court.</span>
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-lg text-gray-400 mb-8 max-w-lg"
+              className="relative text-lg text-purple-100/65 mb-8 max-w-lg"
             >
               Upload game film and get complete AI scouting reports, player tendency cards, film annotations, and 2K-style animated game plans — in minutes, not all-nighters.
             </motion.p>
@@ -276,7 +278,7 @@ export default function Landing() {
             >
               <Button
                 size="lg"
-                className="bg-[#FF7A1A] text-black hover:bg-[#ff8f40] font-semibold text-base px-8"
+                className="bg-[#FDB927] text-[#2b1249] hover:bg-[#ffe08a] font-bold text-base px-8 shadow-[0_12px_30px_rgba(253,185,39,0.2)]"
                 onClick={() => (isAuthenticated ? setLocation("/") : startLogin())}
               >
                 Start Scouting Free
@@ -285,7 +287,7 @@ export default function Landing() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-gray-700 text-white hover:bg-gray-800 text-base px-8"
+                className="border-[#8564a8]/55 text-purple-50 hover:bg-[#2b1249] text-base px-8"
                 onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })}
               >
                 See Features
@@ -296,11 +298,11 @@ export default function Landing() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3 }}
-            className="bg-[#161b22] border border-gray-800 rounded-2xl p-6"
+            className="relative lakers-surface border border-[#7e5ca2]/55 rounded-2xl p-6 shadow-[0_24px_70px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(253,185,39,0.12)]"
           >
             <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-mono text-gray-500 uppercase tracking-wider">Spain Pick & Roll vs Man</span>
-              <span className="text-xs font-mono text-[#FF7A1A]">● LIVE ANALYSIS</span>
+              <span className="text-xs font-mono text-purple-200/45 uppercase tracking-wider">Spain Pick & Roll vs Man</span>
+              <span className="text-xs font-mono text-[#FDE68A]">● LIVE ANALYSIS</span>
             </div>
             <HeroDiagram />
           </motion.div>
@@ -308,11 +310,11 @@ export default function Landing() {
       </section>
 
       {/* Features */}
-      <section id="features" className="py-20 px-6 bg-[#0a0d12]">
+      <section id="features" className="py-20 px-6 bg-[#160a26] border-y border-[#6b4a92]/25">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4">Your AI Coaching Staff</h2>
-            <p className="text-gray-400 max-w-2xl mx-auto">
+            <p className="text-purple-100/65 max-w-2xl mx-auto">
               Everything a varsity, AAU, or college staff needs to out-prepare any opponent, powered by film-room AI.
             </p>
           </div>
@@ -324,13 +326,13 @@ export default function Landing() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.08 }}
-                className="bg-[#161b22] border border-gray-800 rounded-xl p-6 hover:border-[#FF7A1A]/40 transition-colors"
+                className="bg-[#211037] border border-[#6b4a92]/50 rounded-xl p-6 hover:border-[#FDB927]/55 hover:-translate-y-0.5 transition-[border-color,transform,box-shadow] duration-200 hover:shadow-[0_14px_34px_rgba(0,0,0,0.2)]"
               >
-                <div className="w-10 h-10 rounded-lg bg-[#FF7A1A]/10 flex items-center justify-center mb-4">
-                  <feature.icon className="h-5 w-5 text-[#FF7A1A]" />
+                <div className="w-10 h-10 rounded-lg bg-[#FDB927]/10 border border-[#FDB927]/15 flex items-center justify-center mb-4">
+                  <feature.icon className="h-5 w-5 text-[#FDB927]" />
                 </div>
                 <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">{feature.description}</p>
+                <p className="text-sm text-purple-100/60 leading-relaxed">{feature.description}</p>
               </motion.div>
             ))}
           </div>
@@ -342,7 +344,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4">Pick Your Game Plan</h2>
-            <p className="text-gray-400">
+            <p className="text-purple-100/65">
               A one-time build to stand your system up, then a small monthly to keep it running.
             </p>
           </div>
@@ -354,12 +356,12 @@ export default function Landing() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className={`relative bg-[#161b22] border rounded-2xl p-8 ${
-                  tier.popular ? "border-[#FF7A1A] shadow-[0_0_40px_rgba(255,122,26,0.15)]" : "border-gray-800"
+                className={`relative bg-[#211037] border rounded-2xl p-8 ${
+                  tier.popular ? "border-[#FDB927] shadow-[0_0_42px_rgba(253,185,39,0.16),inset_0_1px_0_rgba(253,185,39,0.18)]" : "border-[#6b4a92]/50"
                 }`}
               >
                 {tier.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-[#FF7A1A] text-black text-xs font-bold">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-[#FDB927] text-[#2b1249] text-xs font-black shadow-[0_8px_18px_rgba(253,185,39,0.2)]">
                     MOST POPULAR
                   </div>
                 )}
@@ -367,19 +369,19 @@ export default function Landing() {
                   <tier.icon className="h-5 w-5" style={{ color: tier.color }} />
                 </div>
                 <h3 className="text-xl font-bold mb-1">{tier.name}</h3>
-                <p className="text-sm text-gray-400 mb-4">{tier.description}</p>
+                <p className="text-sm text-purple-100/60 mb-4">{tier.description}</p>
                 <div className="mb-6">
                   <div className="flex items-baseline gap-2">
                     <span className="text-4xl font-bold">${tier.setup.toLocaleString()}</span>
-                    <span className="text-sm text-gray-400">one-time build</span>
+                    <span className="text-sm text-purple-100/55">one-time build</span>
                   </div>
-                  <div className="mt-1 text-sm text-gray-400">
-                    then <span className="font-semibold text-gray-200">${tier.price}</span>/month
+                  <div className="mt-1 text-sm text-purple-100/55">
+                    then <span className="font-semibold text-purple-50">${tier.price}</span>/month
                   </div>
                 </div>
                 <ul className="space-y-3 mb-8">
                   {tier.features.map(feature => (
-                    <li key={feature} className="flex items-start gap-2 text-sm text-gray-300">
+                    <li key={feature} className="flex items-start gap-2 text-sm text-purple-50/80">
                       <Check className="h-4 w-4 mt-0.5 shrink-0" style={{ color: tier.color }} />
                       {feature}
                     </li>
@@ -387,7 +389,7 @@ export default function Landing() {
                 </ul>
                 <Button
                   className={`w-full font-semibold ${
-                    tier.popular ? "bg-[#FF7A1A] text-black hover:bg-[#ff8f40]" : "bg-gray-800 text-white hover:bg-gray-700"
+                    tier.popular ? "bg-[#FDB927] text-[#2b1249] hover:bg-[#ffe08a] font-bold" : "bg-[#32184f] text-purple-50 hover:bg-[#3d1e61] border border-[#8564a8]/35"
                   }`}
                   onClick={() => (isAuthenticated ? setLocation("/") : startLogin())}
                 >
@@ -400,15 +402,15 @@ export default function Landing() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 px-6 bg-[#0a0d12]">
+      <section className="py-20 px-6 bg-[#160a26] border-y border-[#6b4a92]/25">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-4xl font-bold mb-4">Ready to out-scout everyone?</h2>
-          <p className="text-gray-400 mb-8">
+          <p className="text-purple-100/65 mb-8">
             Join coaching staffs using AI to win the film-room battle before tip-off.
           </p>
           <Button
             size="lg"
-            className="bg-[#FF7A1A] text-black hover:bg-[#ff8f40] font-semibold text-base px-10"
+            className="bg-[#FDB927] text-[#2b1249] hover:bg-[#ffe08a] font-bold text-base px-10 shadow-[0_12px_30px_rgba(253,185,39,0.2)]"
             onClick={() => (isAuthenticated ? setLocation("/") : startLogin())}
           >
             Start Your First Scout
@@ -418,13 +420,13 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-800/50 py-8 px-6">
+      <footer className="border-t border-[#6b4a92]/35 py-8 px-6 bg-[#100719]">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <Target className="h-4 w-4 text-[#FF7A1A]" />
+            <Target className="h-4 w-4 text-[#FDB927]" />
             <span className="text-sm font-semibold">CourtVision AI</span>
           </div>
-          <p className="text-xs text-gray-500">© {new Date().getFullYear()} CourtVision AI. Scout smarter, win louder.</p>
+          <p className="text-xs text-purple-200/40">© {new Date().getFullYear()} CourtVision AI. Scout smarter, win louder.</p>
         </div>
       </footer>
     </div>

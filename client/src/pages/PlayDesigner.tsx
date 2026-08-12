@@ -42,7 +42,7 @@ const ROUTE_STYLES: Record<RouteKind, { color: string; dash: string; label: stri
   cut: { color: "#22C55E", dash: "none", label: "Cut" },
   screen: { color: "#FFC53D", dash: "none", label: "Screen" },
   pass: { color: "#3B82F6", dash: "6 4", label: "Pass" },
-  dribble: { color: "#FF7A1A", dash: "2 3", label: "Dribble" },
+  dribble: { color: "#FDB927", dash: "2 3", label: "Dribble" },
 };
 
 const SETS = ["Horns", "Spain PnR", "Motion", "Zipper", "Floppy", "Iso", "Custom"];
@@ -165,7 +165,7 @@ export default function PlayDesigner() {
       <div className="container max-w-6xl py-8 space-y-6">
         <div>
           <h1 className="text-2xl font-black flex items-center gap-2">
-            <PenTool className="h-6 w-6 text-[#FF7A1A]" /> Play Designer
+            <PenTool className="h-6 w-6 text-[#FDB927]" /> Play Designer
           </h1>
           <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
             Draw your own play on the half court, then have the AI grade it like a real offensive
@@ -175,16 +175,16 @@ export default function PlayDesigner() {
 
         <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
           {/* ---------- court canvas ---------- */}
-          <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-4">
+          <div className="rounded-xl border border-[#76549a]/55 bg-[#211037]/85 p-4 shadow-[inset_0_1px_0_rgba(253,185,39,0.1)]">
             {/* toolbar */}
             <div className="flex flex-wrap items-center gap-2 mb-3">
               <button
                 onClick={() => setTool("move")}
                 className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wide border transition-all active:scale-[0.97]"
                 style={{
-                  borderColor: tool === "move" ? "#FF7A1A" : "rgba(255,255,255,0.08)",
-                  background: tool === "move" ? "rgba(255,122,26,0.16)" : "transparent",
-                  color: tool === "move" ? "#FFB27A" : undefined,
+                  borderColor: tool === "move" ? "#FDB927" : "rgba(253,185,39,0.12)",
+                  background: tool === "move" ? "rgba(253,185,39,0.14)" : "transparent",
+                  color: tool === "move" ? "#FDE68A" : undefined,
                   transitionDuration: "160ms",
                 }}
               >
@@ -242,8 +242,8 @@ export default function PlayDesigner() {
               viewBox="0 0 100 100"
               className="w-full rounded-lg select-none"
               style={{
-                background: "linear-gradient(170deg,#1a1410,#120f0c)",
-                border: "1px solid rgba(255,255,255,0.07)",
+                background: "linear-gradient(170deg,#2b1249,#13081f)",
+                border: "1px solid rgba(253,185,39,0.18)",
                 cursor: tool === "move" ? "grab" : "crosshair",
                 aspectRatio: "1 / 1",
               }}
@@ -257,7 +257,7 @@ export default function PlayDesigner() {
               {/* baseline is at bottom in court coords -> top of svg is half court */}
               <line x1="1" y1="1" x2="99" y2="1" stroke="rgba(255,255,255,0.25)" strokeWidth="0.6" />
               {/* paint */}
-              <rect x="38" y={sy(19)} width="24" height="18" fill="rgba(255,122,26,0.07)" stroke="rgba(255,255,255,0.18)" strokeWidth="0.4" />
+              <rect x="38" y={sy(19)} width="24" height="18" fill="rgba(253,185,39,0.09)" stroke="rgba(255,255,255,0.18)" strokeWidth="0.4" />
               {/* free throw circle */}
               <circle cx="50" cy={sy(19)} r="8" fill="none" stroke="rgba(255,255,255,0.16)" strokeWidth="0.4" />
               {/* restricted arc */}
@@ -271,7 +271,7 @@ export default function PlayDesigner() {
               />
               {/* rim + backboard */}
               <rect x="44" y={sy(3)} width="12" height="0.8" fill="rgba(255,255,255,0.4)" />
-              <circle cx="50" cy={sy(6)} r="1.6" fill="none" stroke="#FF7A1A" strokeWidth="0.7" />
+              <circle cx="50" cy={sy(6)} r="1.6" fill="none" stroke="#FDB927" strokeWidth="0.7" />
 
               {/* saved routes */}
               {routes.map((r, i) => {
@@ -341,7 +341,7 @@ export default function PlayDesigner() {
 
               {/* players */}
               {spots.map(s => {
-                const c = POSITION_COLORS[s.position] ?? "#FF7A1A";
+                const c = POSITION_COLORS[s.position] ?? "#FDB927";
                 const isDrawing = drawingFrom === s.position;
                 return (
                   <g
@@ -376,7 +376,7 @@ export default function PlayDesigner() {
 
           {/* ---------- form + grade ---------- */}
           <div className="space-y-4">
-            <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-4 space-y-3">
+            <div className="rounded-xl border border-[#76549a]/55 bg-[#211037]/85 p-4 space-y-3 shadow-[inset_0_1px_0_rgba(253,185,39,0.1)]">
               <div>
                 <Label htmlFor="playName" className="text-[11px] font-bold uppercase tracking-wide">
                   Play Name
@@ -477,7 +477,7 @@ export default function PlayDesigner() {
                       : grade.score >= 70
                         ? "rgba(255,197,61,0.45)"
                         : "rgba(239,68,68,0.45)",
-                  background: "linear-gradient(160deg,#14161c,#0b0c10)",
+                  background: "linear-gradient(160deg,#2b1249,#13081f)",
                   animation: "gradeIn 480ms cubic-bezier(0.23,1,0.32,1) both",
                 }}
               >
@@ -529,13 +529,13 @@ export default function PlayDesigner() {
                     </ul>
                   </div>
                   <div>
-                    <p className="text-[9px] font-black uppercase tracking-[0.14em] text-orange-400 mb-1">
+                    <p className="text-[9px] font-black uppercase tracking-[0.14em] text-[#FDE68A] mb-1">
                       Fix This
                     </p>
                     <ul className="space-y-1">
                       {grade.fixes.map((s, i) => (
                         <li key={i} className="text-[12px] text-foreground/85 flex gap-1.5">
-                          <span className="text-orange-400 shrink-0">→</span> {s}
+                          <span className="text-[#FDB927] shrink-0">→</span> {s}
                         </li>
                       ))}
                     </ul>
@@ -559,7 +559,7 @@ export default function PlayDesigner() {
             )}
 
             {/* saved playbook */}
-            <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-4">
+            <div className="rounded-xl border border-[#76549a]/55 bg-[#211037]/85 p-4">
               <h3 className="text-[11px] font-black uppercase tracking-[0.14em] text-muted-foreground mb-2.5 flex items-center gap-1.5">
                 <Trophy className="h-3 w-3" /> My Playbook ({savedPlays?.length ?? 0})
               </h3>

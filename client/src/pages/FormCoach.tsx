@@ -35,7 +35,7 @@ function CategoryCard({ title, data }: { title: string; data: { score: number; f
       </div>
       <p className="text-gray-300 text-sm mb-2">{data.feedback}</p>
       <div className="bg-black/30 rounded-lg p-2">
-        <span className="text-orange-400 text-xs font-semibold">FIX: </span>
+        <span className="text-[#FDE68A] text-xs font-semibold">FIX: </span>
         <span className="text-gray-300 text-xs">{data.fix}</span>
       </div>
     </div>
@@ -74,25 +74,25 @@ export default function FormCoach() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Input Form */}
             <div className="lg:col-span-2">
-              <div className="bg-gray-900 border border-gray-700 rounded-xl p-6">
+              <div className="lakers-surface border border-[#76549a]/60 rounded-xl p-6 shadow-[inset_0_1px_0_rgba(253,185,39,0.1)]">
                 <h2 className="text-white font-bold mb-4">Analyze Shooting Form</h2>
                 <div className="space-y-4">
                   <div>
                     <label className="text-gray-400 text-sm mb-1 block">Player Name</label>
-                    <Input value={playerName} onChange={e => setPlayerName(e.target.value)} placeholder="e.g. Marcus Johnson #23" className="bg-gray-800 border-gray-600 text-white" />
+                    <Input value={playerName} onChange={e => setPlayerName(e.target.value)} placeholder="e.g. Marcus Johnson #23" className="bg-[#190c2b] border-[#76549a]/70 text-white" />
                   </div>
                   <div>
                     <label className="text-gray-400 text-sm mb-1 block">Video URL (YouTube, Hudl, etc.)</label>
-                    <Input value={videoUrl} onChange={e => setVideoUrl(e.target.value)} placeholder="https://youtube.com/watch?v=..." className="bg-gray-800 border-gray-600 text-white" />
+                    <Input value={videoUrl} onChange={e => setVideoUrl(e.target.value)} placeholder="https://youtube.com/watch?v=..." className="bg-[#190c2b] border-[#76549a]/70 text-white" />
                   </div>
                   <div>
                     <label className="text-gray-400 text-sm mb-1 block">Coach's Observations (optional)</label>
-                    <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="What have you noticed? Any specific concerns about their form?" className="bg-gray-800 border-gray-600 text-white h-24" />
+                    <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="What have you noticed? Any specific concerns about their form?" className="bg-[#190c2b] border-[#76549a]/70 text-white h-24" />
                   </div>
                   <Button
                     onClick={() => analyzeMut.mutate({ playerName, videoUrl, notes })}
                     disabled={!playerName || !videoUrl || analyzeMut.isPending}
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3"
+                    className="w-full bg-[#FDB927] hover:bg-[#ffe08a] text-[#2b1249] font-black py-3 shadow-[0_10px_24px_rgba(253,185,39,0.16)]"
                   >
                     {analyzeMut.isPending ? "Submitting..." : "🎯 Analyze Form"}
                   </Button>
@@ -102,12 +102,12 @@ export default function FormCoach() {
 
             {/* History */}
             <div>
-              <div className="bg-gray-900 border border-gray-700 rounded-xl p-4">
+              <div className="lakers-surface border border-[#76549a]/60 rounded-xl p-4">
                 <h3 className="text-white font-bold mb-3 text-sm uppercase tracking-wider">Recent Analyses</h3>
                 {history && history.length > 0 ? (
                   <div className="space-y-2">
                     {history.slice(0, 8).map((h: any) => (
-                      <div key={h.id} onClick={() => setAnalysisId(h.id)} className="flex items-center justify-between p-3 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors">
+                      <div key={h.id} onClick={() => setAnalysisId(h.id)} className="flex items-center justify-between p-3 bg-[#211037] rounded-lg cursor-pointer hover:bg-[#30184c] transition-colors">
                         <div>
                           <div className="text-white text-sm font-medium">{h.playerName}</div>
                           <div className="text-gray-500 text-xs">{new Date(h.createdAt).toLocaleDateString()}</div>
@@ -132,8 +132,8 @@ export default function FormCoach() {
             <div className="flex gap-2">
               {["Stance", "Release", "Follow-Through", "Balance"].map((step, i) => (
                 <div key={step} className="flex flex-col items-center gap-1">
-                  <div className="w-8 h-8 rounded-full bg-orange-500/20 border border-orange-500 flex items-center justify-center animate-pulse" style={{ animationDelay: `${i * 0.3}s` }}>
-                    <span className="text-orange-400 text-xs">✓</span>
+                  <div className="w-8 h-8 rounded-full bg-[#FDB927]/15 border border-[#FDB927] flex items-center justify-center animate-pulse" style={{ animationDelay: `${i * 0.3}s` }}>
+                    <span className="text-[#FDE68A] text-xs">✓</span>
                   </div>
                   <span className="text-gray-500 text-xs">{step}</span>
                 </div>
@@ -143,14 +143,14 @@ export default function FormCoach() {
         ) : result ? (
           <div className="space-y-6">
             {/* Header */}
-            <div className="bg-gray-900 border border-gray-700 rounded-xl p-6">
+            <div className="lakers-surface border border-[#76549a]/60 rounded-xl p-6 shadow-[inset_0_1px_0_rgba(253,185,39,0.1)]">
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h2 className="text-white text-xl font-bold">{analysis?.playerName}</h2>
                   <p className="text-gray-400 text-sm">{result.summary}</p>
                 </div>
                 <div className="text-center">
-                  <div className="text-5xl font-black text-orange-400">{result.grade}</div>
+                  <div className="text-5xl font-black text-[#FDB927]">{result.grade}</div>
                   <div className="text-gray-400 text-xs">Overall Grade</div>
                 </div>
               </div>
@@ -166,8 +166,8 @@ export default function FormCoach() {
 
               {/* NBA Comparison */}
               {result.comparedTo && (
-                <div className="mt-4 bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 text-center">
-                  <span className="text-orange-400 text-sm">Shooting style similar to: </span>
+                <div className="mt-4 bg-[#FDB927]/10 border border-[#FDB927]/30 rounded-lg p-3 text-center">
+                  <span className="text-[#FDE68A] text-sm">Shooting style similar to: </span>
                   <span className="text-white font-bold">{result.comparedTo}</span>
                 </div>
               )}
@@ -207,14 +207,14 @@ export default function FormCoach() {
             </div>
 
             {/* Drills */}
-            <div className="bg-gray-900 border border-gray-700 rounded-xl p-4">
+            <div className="lakers-surface border border-[#76549a]/60 rounded-xl p-4">
               <h3 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">🏋️ Prescribed Drills</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {(result.drills || []).map((drill: any, i: number) => (
-                  <div key={i} className="bg-gray-800 rounded-lg p-4">
+                  <div key={i} className="bg-[#211037] border border-[#6b4a92]/35 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-orange-400 font-bold text-sm">{drill.name}</span>
-                      <Badge className="bg-orange-500/20 text-orange-300 text-xs">{drill.reps}</Badge>
+                      <span className="text-[#FDE68A] font-bold text-sm">{drill.name}</span>
+                      <Badge className="bg-[#FDB927]/15 text-[#FDE68A] text-xs">{drill.reps}</Badge>
                     </div>
                     <p className="text-gray-300 text-xs mb-2">{drill.description}</p>
                     <p className="text-gray-500 text-xs">Targets: {drill.targets}</p>
@@ -225,8 +225,8 @@ export default function FormCoach() {
 
             {/* Coach Quote */}
             {result.coachQuote && (
-              <div className="bg-orange-500/10 border border-orange-500/30 rounded-xl p-4">
-                <blockquote className="text-orange-300 italic text-center">"{result.coachQuote}"</blockquote>
+              <div className="bg-[#FDB927]/10 border border-[#FDB927]/30 rounded-xl p-4">
+                <blockquote className="text-[#FDE68A] italic text-center">"{result.coachQuote}"</blockquote>
               </div>
             )}
 
@@ -235,7 +235,7 @@ export default function FormCoach() {
         ) : (
           <div className="text-center py-12">
             <p className="text-red-400">Analysis failed. Please try again.</p>
-            <Button onClick={() => setAnalysisId(null)} className="mt-4 bg-orange-500">Try Again</Button>
+            <Button onClick={() => setAnalysisId(null)} className="mt-4 bg-[#FDB927] text-[#2b1249] hover:bg-[#ffe08a]">Try Again</Button>
           </div>
         )}
       </div>

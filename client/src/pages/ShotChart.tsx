@@ -97,7 +97,7 @@ export default function ShotChart() {
             </h1>
             <p className="text-gray-400 text-sm mt-1">Click the court to log shots. Real-time heat map updates automatically.</p>
           </div>
-          <Button onClick={() => setCreating(true)} className="bg-orange-500 hover:bg-orange-600 text-white">
+          <Button onClick={() => setCreating(true)} className="bg-[#FDB927] hover:bg-[#ffe08a] text-[#2b1249] font-bold shadow-[0_10px_24px_rgba(253,185,39,0.16)]">
             + New Chart
           </Button>
         </div>
@@ -105,13 +105,13 @@ export default function ShotChart() {
         {/* Create New Chart Modal */}
         {creating && (
           <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-            <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-96">
+            <div className="lakers-surface border border-[#76549a]/60 rounded-xl p-6 w-96 shadow-[0_20px_70px_rgba(0,0,0,0.45)]">
               <h2 className="text-white font-bold text-lg mb-4">New Shot Chart</h2>
-              <Input placeholder="Your Team Name" value={newTeam} onChange={e => setNewTeam(e.target.value)} className="mb-3 bg-gray-800 border-gray-600 text-white" />
-              <Input placeholder="Opponent Name (optional)" value={newOpp} onChange={e => setNewOpp(e.target.value)} className="mb-4 bg-gray-800 border-gray-600 text-white" />
+              <Input placeholder="Your Team Name" value={newTeam} onChange={e => setNewTeam(e.target.value)} className="mb-3 bg-[#190c2b] border-[#76549a]/70 text-white" />
+              <Input placeholder="Opponent Name (optional)" value={newOpp} onChange={e => setNewOpp(e.target.value)} className="mb-4 bg-[#190c2b] border-[#76549a]/70 text-white" />
               <div className="flex gap-2">
-                <Button onClick={() => createMut.mutate({ teamName: newTeam, opponentName: newOpp })} disabled={!newTeam} className="flex-1 bg-orange-500 hover:bg-orange-600">Start Tracking</Button>
-                <Button variant="outline" onClick={() => setCreating(false)} className="flex-1 border-gray-600 text-gray-300">Cancel</Button>
+                <Button onClick={() => createMut.mutate({ teamName: newTeam, opponentName: newOpp })} disabled={!newTeam} className="flex-1 bg-[#FDB927] hover:bg-[#ffe08a] text-[#2b1249] font-bold">Start Tracking</Button>
+                <Button variant="outline" onClick={() => setCreating(false)} className="flex-1 border-[#76549a]/70 text-purple-100">Cancel</Button>
               </div>
             </div>
           </div>
@@ -123,10 +123,10 @@ export default function ShotChart() {
             <h2 className="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-3">Recent Charts</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {charts.slice(0, 6).map((c: any) => (
-                <div key={c.id} onClick={() => setActiveChart(c)} className="bg-gray-900 border border-gray-700 rounded-lg p-4 cursor-pointer hover:border-orange-500 transition-colors">
+                <div key={c.id} onClick={() => setActiveChart(c)} className="lakers-surface border border-[#6b4a92]/55 rounded-lg p-4 cursor-pointer hover:border-[#FDB927]/70 transition-colors">
                   <div className="font-semibold text-white">{c.teamName}</div>
                   {c.opponentName && <div className="text-gray-400 text-sm">vs {c.opponentName}</div>}
-                  <div className="text-orange-400 text-xs mt-1">{new Date(c.createdAt).toLocaleDateString()}</div>
+                  <div className="text-[#FDE68A] text-xs mt-1">{new Date(c.createdAt).toLocaleDateString()}</div>
                 </div>
               ))}
             </div>
@@ -137,24 +137,24 @@ export default function ShotChart() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Court */}
             <div className="lg:col-span-2">
-              <div className="bg-gray-900 border border-gray-700 rounded-xl p-4">
+              <div className="lakers-surface border border-[#76549a]/60 rounded-xl p-4 shadow-[inset_0_1px_0_rgba(253,185,39,0.1)]">
                 <div className="flex items-center justify-between mb-3">
                   <div>
                     <span className="text-white font-bold">{activeChart.teamName}</span>
                     {activeChart.opponentName && <span className="text-gray-400 text-sm ml-2">vs {activeChart.opponentName}</span>}
                   </div>
                   <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={handleUndo} className="border-gray-600 text-gray-300 text-xs">↩ Undo</Button>
-                    <Button size="sm" variant="outline" onClick={() => setActiveChart(null)} className="border-gray-600 text-gray-300 text-xs">← Back</Button>
+                    <Button size="sm" variant="outline" onClick={handleUndo} className="border-[#76549a]/70 text-purple-100 text-xs">↩ Undo</Button>
+                    <Button size="sm" variant="outline" onClick={() => setActiveChart(null)} className="border-[#76549a]/70 text-purple-100 text-xs">← Back</Button>
                   </div>
                 </div>
 
                 {/* Shot Mode Toggle */}
                 <div className="flex gap-2 mb-3">
-                  <button onClick={() => setShotMode("made")} className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${shotMode === "made" ? "bg-green-500 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700"}`}>✓ Made</button>
-                  <button onClick={() => setShotMode("missed")} className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${shotMode === "missed" ? "bg-red-500 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700"}`}>✗ Missed</button>
+                  <button onClick={() => setShotMode("made")} className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${shotMode === "made" ? "bg-green-500 text-white" : "bg-[#211037] text-purple-100/65 hover:bg-[#30184c]"}`}>✓ Made</button>
+                  <button onClick={() => setShotMode("missed")} className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${shotMode === "missed" ? "bg-red-500 text-white" : "bg-[#211037] text-purple-100/65 hover:bg-[#30184c]"}`}>✗ Missed</button>
                   {[1,2,3,4].map(q => (
-                    <button key={q} onClick={() => setSelectedQuarter(q)} className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-all ${selectedQuarter === q ? "bg-orange-500 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700"}`}>Q{q}</button>
+                    <button key={q} onClick={() => setSelectedQuarter(q)} className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-all ${selectedQuarter === q ? "bg-[#FDB927] text-[#2b1249]" : "bg-[#211037] text-purple-100/65 hover:bg-[#30184c]"}`}>Q{q}</button>
                   ))}
                 </div>
 
@@ -225,16 +225,16 @@ export default function ShotChart() {
             {/* Stats Panel */}
             <div className="space-y-4">
               {/* Overall Stats */}
-              <div className="bg-gray-900 border border-gray-700 rounded-xl p-4">
+              <div className="lakers-surface border border-[#76549a]/60 rounded-xl p-4">
                 <h3 className="text-white font-bold mb-3 text-sm uppercase tracking-wider">Live Stats</h3>
                 {stats ? (
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
                       <span className="text-gray-400 text-sm">Field Goal %</span>
-                      <span className="text-orange-400 font-bold text-xl">{stats.pct}%</span>
+                      <span className="text-[#FDB927] font-bold text-xl">{stats.pct}%</span>
                     </div>
-                    <div className="w-full bg-gray-800 rounded-full h-2">
-                      <div className="bg-orange-500 h-2 rounded-full transition-all" style={{ width: `${stats.pct}%` }} />
+                    <div className="w-full bg-[#190c2b] rounded-full h-2">
+                      <div className="bg-[#FDB927] h-2 rounded-full transition-all" style={{ width: `${stats.pct}%` }} />
                     </div>
                     <div className="grid grid-cols-3 gap-2 text-center">
                       <div className="bg-gray-800 rounded-lg p-2">
@@ -258,7 +258,7 @@ export default function ShotChart() {
 
               {/* Hot/Cold Zones */}
               {stats && (stats.hotZones.length > 0 || stats.coldZones.length > 0) && (
-                <div className="bg-gray-900 border border-gray-700 rounded-xl p-4">
+                <div className="lakers-surface border border-[#76549a]/60 rounded-xl p-4">
                   <h3 className="text-white font-bold mb-3 text-sm uppercase tracking-wider">Zone Analysis</h3>
                   {stats.hotZones.length > 0 && (
                     <div className="mb-2">
@@ -281,15 +281,15 @@ export default function ShotChart() {
 
               {/* Zone Breakdown */}
               {stats && Object.keys(stats.zones).length > 0 && (
-                <div className="bg-gray-900 border border-gray-700 rounded-xl p-4">
+                <div className="lakers-surface border border-[#76549a]/60 rounded-xl p-4">
                   <h3 className="text-white font-bold mb-3 text-sm uppercase tracking-wider">By Zone</h3>
                   <div className="space-y-2">
                     {Object.entries(stats.zones).map(([zone, data]: [string, any]) => (
                       <div key={zone} className="flex items-center justify-between">
                         <span className="text-gray-400 text-xs">{ZONES[zone]?.label || zone}</span>
                         <div className="flex items-center gap-2">
-                          <div className="w-16 bg-gray-800 rounded-full h-1.5">
-                            <div className="h-1.5 rounded-full bg-orange-500" style={{ width: `${(data.made / data.total) * 100}%` }} />
+                          <div className="w-16 bg-[#190c2b] rounded-full h-1.5">
+                            <div className="h-1.5 rounded-full bg-[#FDB927]" style={{ width: `${(data.made / data.total) * 100}%` }} />
                           </div>
                           <span className="text-white text-xs font-mono w-16 text-right">{data.made}/{data.total} ({Math.round((data.made/data.total)*100)}%)</span>
                         </div>
@@ -301,7 +301,7 @@ export default function ShotChart() {
 
               {/* Quarter Breakdown */}
               {stats && Object.keys(stats.byQuarter).length > 0 && (
-                <div className="bg-gray-900 border border-gray-700 rounded-xl p-4">
+                <div className="lakers-surface border border-[#76549a]/60 rounded-xl p-4">
                   <h3 className="text-white font-bold mb-3 text-sm uppercase tracking-wider">By Quarter</h3>
                   <div className="grid grid-cols-4 gap-2">
                     {[1,2,3,4].map(q => {
@@ -310,7 +310,7 @@ export default function ShotChart() {
                         <div key={q} className="bg-gray-800 rounded-lg p-2 text-center">
                           <div className="text-gray-400 text-xs mb-1">Q{q}</div>
                           <div className="text-white font-bold text-sm">{qd ? `${qd.made}/${qd.total}` : "—"}</div>
-                          <div className="text-orange-400 text-xs">{qd && qd.total > 0 ? `${Math.round((qd.made/qd.total)*100)}%` : ""}</div>
+                          <div className="text-[#FDE68A] text-xs">{qd && qd.total > 0 ? `${Math.round((qd.made/qd.total)*100)}%` : ""}</div>
                         </div>
                       );
                     })}
@@ -327,7 +327,7 @@ export default function ShotChart() {
             <div className="text-6xl mb-4">🏀</div>
             <h2 className="text-white text-xl font-bold mb-2">No Shot Charts Yet</h2>
             <p className="text-gray-400 mb-6">Create your first shot chart to start tracking shots in real time.</p>
-            <Button onClick={() => setCreating(true)} className="bg-orange-500 hover:bg-orange-600 text-white">Create Shot Chart</Button>
+            <Button onClick={() => setCreating(true)} className="bg-[#FDB927] hover:bg-[#ffe08a] text-[#2b1249] font-bold">Create Shot Chart</Button>
           </div>
         )}
       </div>

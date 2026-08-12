@@ -9,7 +9,7 @@ const TYPE_CONFIG: Record<string, { label: string; color: string; icon: string }
   mistake:        { label: "Teachable Moment", color: "bg-red-500/20 text-red-300 border-red-500/30",        icon: "📌" },
   defensive_stop: { label: "Defensive Stop",  color: "bg-blue-500/20 text-blue-300 border-blue-500/30",     icon: "🛡️" },
   clutch:         { label: "Clutch Moment",   color: "bg-purple-500/20 text-purple-300 border-purple-500/30", icon: "🔥" },
-  teachable:      { label: "Coaching Point",  color: "bg-orange-500/20 text-orange-300 border-orange-500/30", icon: "💡" },
+  teachable:      { label: "Coaching Point",  color: "bg-[#FDB927]/15 text-[#FDE68A] border-[#FDB927]/30", icon: "💡" },
 };
 
 function formatTime(seconds: number) {
@@ -49,14 +49,14 @@ export default function HighlightReel() {
         </div>
 
         {/* Session Selector */}
-        <div className="bg-gray-900 border border-gray-700 rounded-xl p-4 mb-6">
+        <div className="lakers-surface border border-[#76549a]/60 rounded-xl p-4 mb-6 shadow-[inset_0_1px_0_rgba(253,185,39,0.1)]">
           <h2 className="text-white font-semibold mb-3">Select a Scouting Session</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {sessions?.map((s: any) => (
               <div
                 key={s.id}
                 onClick={() => { setSelectedSession(s.id); setReelId(null); }}
-                className={`p-3 rounded-lg cursor-pointer border transition-all ${selectedSession === s.id ? "border-orange-500 bg-orange-500/10" : "border-gray-700 bg-gray-800 hover:border-gray-500"}`}
+                className={`p-3 rounded-lg cursor-pointer border transition-all ${selectedSession === s.id ? "border-[#FDB927] bg-[#FDB927]/10 shadow-[0_0_20px_rgba(253,185,39,0.1)]" : "border-[#6b4a92]/55 bg-[#211037] hover:border-[#a17fc5]"}`}
               >
                 <div className="text-white font-medium text-sm">vs {s.opponentName}</div>
                 <div className="text-gray-400 text-xs">{new Date(s.createdAt).toLocaleDateString()}</div>
@@ -71,7 +71,7 @@ export default function HighlightReel() {
             <Button
               onClick={() => generateMut.mutate({ sessionId: selectedSession })}
               disabled={isGenerating}
-              className="bg-orange-500 hover:bg-orange-600 text-white"
+              className="bg-[#FDB927] hover:bg-[#ffe08a] text-[#2b1249] font-bold"
             >
               {isGenerating ? "Generating..." : existingReel ? "🔄 Regenerate Reel" : "🎬 Generate Highlight Reel"}
             </Button>
@@ -97,15 +97,15 @@ export default function HighlightReel() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-white font-bold">Highlight Moments ({activeMoments.length})</h2>
-              <Badge className="bg-orange-500/20 text-orange-300 border-orange-500/30">Ready for Film Review</Badge>
+              <Badge className="bg-[#FDB927]/15 text-[#FDE68A] border-[#FDB927]/30">Ready for Film Review</Badge>
             </div>
             {activeMoments.map((moment: any, i: number) => {
               const cfg = TYPE_CONFIG[moment.type] || TYPE_CONFIG.teachable;
               return (
-                <div key={i} className="bg-gray-900 border border-gray-700 rounded-xl p-4 hover:border-gray-500 transition-colors">
+                <div key={i} className="lakers-surface border border-[#76549a]/60 rounded-xl p-4 hover:border-[#FDB927]/45 transition-colors">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-sm font-bold text-orange-400">
+                      <div className="w-8 h-8 rounded-full bg-[#FDB927]/15 border border-[#FDB927]/40 flex items-center justify-center text-sm font-bold text-[#FDE68A]">
                         {i + 1}
                       </div>
                       <div>
@@ -119,8 +119,8 @@ export default function HighlightReel() {
                     <Badge className={`${cfg.color} text-xs`} variant="outline">{cfg.icon} {cfg.label}</Badge>
                   </div>
                   <p className="text-gray-300 text-sm mb-2">{moment.why}</p>
-                  <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-3">
-                    <span className="text-orange-400 text-xs font-semibold">COACHING POINT: </span>
+                  <div className="bg-[#FDB927]/10 border border-[#FDB927]/20 rounded-lg p-3">
+                    <span className="text-[#FDE68A] text-xs font-semibold">COACHING POINT: </span>
                     <span className="text-gray-300 text-sm">{moment.coachingPoint}</span>
                   </div>
                 </div>

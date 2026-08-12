@@ -44,9 +44,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
-      <aside className="w-60 shrink-0 border-r border-border bg-sidebar hidden md:flex flex-col">
-        <div className="h-16 flex items-center gap-2 px-5 border-b border-border">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+      <aside className="w-60 shrink-0 border-r border-border bg-sidebar hidden md:flex flex-col bg-[linear-gradient(180deg,rgba(85,37,131,0.36)_0%,rgba(18,7,37,0.18)_42%,transparent_100%)]">
+        <div className="h-16 flex items-center gap-2 px-5 border-b border-border lakers-gold-line">
+          <div className="w-8 h-8 rounded-lg border border-primary/35 bg-primary/15 flex items-center justify-center shadow-[0_0_18px_rgba(253,185,39,0.12)]">
             <Target className="h-4 w-4 text-primary" />
           </div>
           <span className="font-bold text-sidebar-foreground">CourtVision AI</span>
@@ -57,10 +57,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             return (
               <Link key={item.path} href={item.path}>
                 <div
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-[background-color,color,box-shadow,transform] duration-200 cursor-pointer ${
                     active
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                      ? "bg-primary text-primary-foreground shadow-[0_8px_22px_rgba(253,185,39,0.14)]"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent hover:translate-x-0.5"
                   }`}
                 >
                   <item.icon className="h-4 w-4" />
@@ -70,7 +70,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             );
           })}
         </nav>
-        <div className="p-3 border-t border-border">
+        <div className="p-3 border-t border-border bg-black/10">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-accent transition-colors">
@@ -94,15 +94,15 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
       {/* Mobile top bar + content */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="md:hidden h-14 flex items-center justify-between px-4 border-b border-border bg-sidebar">
-          <div className="flex items-center gap-2">
+        <header className="md:hidden h-14 flex items-center gap-2 px-4 border-b border-border bg-sidebar bg-[linear-gradient(90deg,rgba(85,37,131,0.35),transparent)]">
+          <div className="flex items-center gap-2 shrink-0">
             <Target className="h-4 w-4 text-primary" />
             <span className="font-bold text-sm">CourtVision AI</span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex flex-1 min-w-0 items-center gap-1 overflow-x-auto justify-end [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {navItems.map(item => (
               <Link key={item.path} href={item.path}>
-                <Button variant="ghost" size="icon" className={location === item.path ? "text-primary" : "text-muted-foreground"}>
+                <Button variant="ghost" size="icon" className={`shrink-0 ${location === item.path ? "text-primary" : "text-muted-foreground"}`}>
                   <item.icon className="h-4 w-4" />
                 </Button>
               </Link>

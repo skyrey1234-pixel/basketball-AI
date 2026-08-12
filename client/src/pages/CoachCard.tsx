@@ -99,7 +99,7 @@ export default function CoachCard() {
           className="relative rounded-2xl border-2 overflow-hidden"
           style={{
             borderColor: style.ring,
-            background: "linear-gradient(155deg,#16181f 0%,#0d0f14 50%,#0a0b0f 100%)",
+            background: "linear-gradient(155deg,#2b1249 0%,#180a2b 50%,#100719 100%)",
             boxShadow: `0 20px 60px -22px ${style.glow}`,
           }}
         >
@@ -134,7 +134,7 @@ export default function CoachCard() {
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">
                   Level {data.level} ·{" "}
-                  <span className="text-orange-400 font-semibold tabular-nums">
+                  <span className="text-[#FDB927] font-semibold tabular-nums">
                     {data.xp.toLocaleString()} XP
                   </span>
                   {data.record.wins + data.record.losses > 0 && (
@@ -189,8 +189,8 @@ export default function CoachCard() {
                   className="h-full rounded-full relative"
                   style={{
                     width: `${data.progress.pct}%`,
-                    background: "linear-gradient(90deg,#FF7A1A,#FFC53D)",
-                    boxShadow: "0 0 16px rgba(255,122,26,0.55)",
+                    background: "linear-gradient(90deg,#552583,#FDB927)",
+                    boxShadow: "0 0 16px rgba(253,185,39,0.5)",
                     animation: "xpFill 900ms cubic-bezier(0.23,1,0.32,1) 300ms both",
                     transformOrigin: "left center",
                   }}
@@ -232,7 +232,7 @@ export default function CoachCard() {
                 <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.14em] text-muted-foreground mb-1">
                   <Trophy className="h-3 w-3" /> Badges
                 </div>
-                <div className="text-xl font-black tabular-nums text-orange-400">
+                <div className="text-xl font-black tabular-nums text-[#FDB927]">
                   {data.badges.length}
                   <span className="text-sm text-muted-foreground font-bold">
                     /{COACH_BADGES.length}
@@ -267,7 +267,7 @@ export default function CoachCard() {
                     animation: `statIn 420ms cubic-bezier(0.23,1,0.32,1) ${i * 60}ms both`,
                   }}
                 >
-                  <Icon className="h-4 w-4 mx-auto text-orange-400/80 mb-1.5" />
+                  <Icon className="h-4 w-4 mx-auto text-[#FDB927]/80 mb-1.5" />
                   <div className="text-2xl font-black tabular-nums leading-none">{s.value}</div>
                   <div className="text-[9px] uppercase tracking-wide text-muted-foreground font-bold mt-1">
                     {s.label}
@@ -295,8 +295,8 @@ export default function CoachCard() {
                   key={b.id}
                   className="rounded-lg border px-3 py-3 flex items-start gap-3"
                   style={{
-                    borderColor: has ? "rgba(255,122,26,0.4)" : "rgba(255,255,255,0.06)",
-                    background: has ? "rgba(255,122,26,0.08)" : "rgba(255,255,255,0.015)",
+                    borderColor: has ? "rgba(253,185,39,0.45)" : "rgba(255,255,255,0.06)",
+                    background: has ? "linear-gradient(120deg,rgba(85,37,131,0.26),rgba(253,185,39,0.08))" : "rgba(255,255,255,0.015)",
                     opacity: has ? 1 : 0.55,
                     animation: `statIn 420ms cubic-bezier(0.23,1,0.32,1) ${i * 45}ms both`,
                   }}
@@ -304,15 +304,15 @@ export default function CoachCard() {
                   <div
                     className="shrink-0 h-9 w-9 rounded-lg flex items-center justify-center"
                     style={{
-                      background: has ? "rgba(255,122,26,0.2)" : "rgba(255,255,255,0.04)",
+                      background: has ? "rgba(253,185,39,0.16)" : "rgba(255,255,255,0.04)",
                       border: has
-                        ? "1px solid rgba(255,122,26,0.5)"
+                        ? "1px solid rgba(253,185,39,0.5)"
                         : "1px solid rgba(255,255,255,0.08)",
-                      boxShadow: has ? "0 0 16px -4px rgba(255,122,26,0.5)" : undefined,
+                      boxShadow: has ? "0 0 16px -4px rgba(253,185,39,0.5)" : undefined,
                     }}
                   >
                     {has ? (
-                      <Icon className="h-4 w-4 text-orange-400" />
+                      <Icon className="h-4 w-4 text-[#FDB927]" />
                     ) : (
                       <Lock className="h-3.5 w-3.5 text-muted-foreground" />
                     )}
@@ -320,7 +320,7 @@ export default function CoachCard() {
                   <div className="min-w-0">
                     <p
                       className="text-[13px] font-bold leading-tight"
-                      style={{ color: has ? "#FFB27A" : undefined }}
+                      style={{ color: has ? "#FDE68A" : undefined }}
                     >
                       {b.label}
                     </p>

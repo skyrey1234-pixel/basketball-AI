@@ -171,7 +171,7 @@ export default function SessionPage() {
             <TabsContent value="dna">
               <div className="mb-5">
                 <h2 className="text-lg font-bold flex items-center gap-2">
-                  <Dna className="h-5 w-5 text-[#FF7A1A]" /> DNA Lab
+                  <Dna className="h-5 w-5 text-[#FDB927]" /> DNA Lab
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
                   Every scouted player converted into a 2K-style card — 0-99 tendency ratings, hot and
@@ -189,7 +189,7 @@ export default function SessionPage() {
             <TabsContent value="battle">
               <div className="mb-5">
                 <h2 className="text-lg font-bold flex items-center gap-2">
-                  <Flame className="h-5 w-5 text-[#FF7A1A]" /> Battle Screen
+                  <Flame className="h-5 w-5 text-[#FDB927]" /> Battle Screen
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
                   Head-to-head, MyTeam style. Their attribute ratings on the right, the defensive load
@@ -204,7 +204,7 @@ export default function SessionPage() {
             <TabsContent value="timemachine">
               <div className="mb-5">
                 <h2 className="text-lg font-bold flex items-center gap-2">
-                  <Rewind className="h-5 w-5 text-[#FF7A1A]" /> Time Machine
+                  <Rewind className="h-5 w-5 text-[#FDB927]" /> Time Machine
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
                   Watch the real possession on the actual film, frozen on the exact frame where the
@@ -223,7 +223,7 @@ export default function SessionPage() {
             <TabsContent value="postgame">
               <div className="mb-5">
                 <h2 className="text-lg font-bold flex items-center gap-2">
-                  <Target className="h-5 w-5 text-[#FF7A1A]" /> Post Game: Prediction vs Reality
+                  <Target className="h-5 w-5 text-[#FDB927]" /> Post Game: Prediction vs Reality
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
                   Close the loop. Log the final score and the AI grades its own report — what it called

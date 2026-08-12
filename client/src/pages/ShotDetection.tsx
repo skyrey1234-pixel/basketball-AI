@@ -48,14 +48,14 @@ export default function ShotDetection() {
         </div>
 
         {/* Session Selector */}
-        <div className="bg-gray-900 border border-gray-700 rounded-xl p-4 mb-6">
+        <div className="lakers-surface border border-[#76549a]/60 rounded-xl p-4 mb-6 shadow-[inset_0_1px_0_rgba(253,185,39,0.1)]">
           <h2 className="text-white font-semibold mb-3">Select a Session to Analyze</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {sessions?.map((s: any) => (
               <div
                 key={s.id}
                 onClick={() => setSelectedSession(s.id)}
-                className={`p-3 rounded-lg cursor-pointer border transition-all ${selectedSession === s.id ? "border-orange-500 bg-orange-500/10" : "border-gray-700 bg-gray-800 hover:border-gray-500"}`}
+                className={`p-3 rounded-lg cursor-pointer border transition-all ${selectedSession === s.id ? "border-[#FDB927] bg-[#FDB927]/10 shadow-[0_0_20px_rgba(253,185,39,0.1)]" : "border-[#6b4a92]/55 bg-[#211037] hover:border-[#a17fc5]"}`}
               >
                 <div className="text-white font-medium text-sm">vs {s.opponentName}</div>
                 <div className="text-gray-400 text-xs">{new Date(s.createdAt).toLocaleDateString()}</div>
@@ -69,7 +69,7 @@ export default function ShotDetection() {
             <Button
               onClick={() => analyzeMut.mutate({ sessionId: selectedSession })}
               disabled={isAnalyzing}
-              className="bg-orange-500 hover:bg-orange-600 text-white"
+              className="bg-[#FDB927] hover:bg-[#ffe08a] text-[#2b1249] font-bold"
             >
               {isAnalyzing ? "Analyzing..." : report ? "🔄 Re-Analyze" : "📡 Run Shot Detection"}
             </Button>
@@ -85,8 +85,8 @@ export default function ShotDetection() {
             <div className="flex gap-3">
               {["Ball Tracking", "Zone Mapping", "Pattern Analysis", "Defense Report"].map((step, i) => (
                 <div key={step} className="flex flex-col items-center gap-1">
-                  <div className="w-10 h-10 rounded-full bg-orange-500/20 border border-orange-500 flex items-center justify-center animate-pulse" style={{ animationDelay: `${i * 0.4}s` }}>
-                    <span className="text-orange-400 text-xs">●</span>
+                  <div className="w-10 h-10 rounded-full bg-[#FDB927]/15 border border-[#FDB927] flex items-center justify-center animate-pulse" style={{ animationDelay: `${i * 0.4}s` }}>
+                    <span className="text-[#FDE68A] text-xs">●</span>
                   </div>
                   <span className="text-gray-500 text-xs text-center">{step}</span>
                 </div>
@@ -102,11 +102,11 @@ export default function ShotDetection() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 { label: "Total Shots", value: analytics.totalShots, color: "text-white" },
-                { label: "FG%", value: `${analytics.fieldGoalPct}%`, color: "text-orange-400" },
+                { label: "FG%", value: `${analytics.fieldGoalPct}%`, color: "text-[#FDB927]" },
                 { label: "3PT%", value: `${analytics.threePtPct}%`, color: "text-blue-400" },
                 { label: "2PT%", value: `${analytics.twoPointPct}%`, color: "text-green-400" },
               ].map(stat => (
-                <div key={stat.label} className="bg-gray-900 border border-gray-700 rounded-xl p-4 text-center">
+                <div key={stat.label} className="lakers-surface border border-[#76549a]/60 rounded-xl p-4 text-center">
                   <div className={`text-3xl font-black ${stat.color}`}>{stat.value}</div>
                   <div className="text-gray-400 text-xs mt-1">{stat.label}</div>
                 </div>
@@ -115,7 +115,7 @@ export default function ShotDetection() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Made vs Missed */}
-              <div className="bg-gray-900 border border-gray-700 rounded-xl p-4">
+              <div className="lakers-surface border border-[#76549a]/60 rounded-xl p-4">
                 <h3 className="text-white font-bold mb-3 text-sm uppercase tracking-wider">Shot Breakdown</h3>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="flex-1">
@@ -141,7 +141,7 @@ export default function ShotDetection() {
               </div>
 
               {/* Hot/Cold Zones */}
-              <div className="bg-gray-900 border border-gray-700 rounded-xl p-4">
+              <div className="lakers-surface border border-[#76549a]/60 rounded-xl p-4">
                 <h3 className="text-white font-bold mb-3 text-sm uppercase tracking-wider">Zone Ratings</h3>
                 {analytics.hotZones?.length > 0 && (
                   <div className="mb-3">
@@ -162,14 +162,14 @@ export default function ShotDetection() {
               </div>
 
               {/* Quarter Timeline */}
-              <div className="bg-gray-900 border border-gray-700 rounded-xl p-4">
+              <div className="lakers-surface border border-[#76549a]/60 rounded-xl p-4">
                 <h3 className="text-white font-bold mb-3 text-sm uppercase tracking-wider">By Quarter</h3>
                 <div className="space-y-2">
                   {analytics.shotTimeline?.map((q: any) => (
                     <div key={q.quarter} className="flex items-center gap-2">
                       <span className="text-gray-400 text-xs w-6">Q{q.quarter}</span>
-                      <div className="flex-1 bg-gray-800 rounded-full h-2">
-                        <div className="h-2 bg-orange-500 rounded-full" style={{ width: `${(q.made / (q.made + q.missed)) * 100}%` }} />
+                      <div className="flex-1 bg-[#190c2b] rounded-full h-2">
+                        <div className="h-2 bg-[#FDB927] rounded-full" style={{ width: `${(q.made / (q.made + q.missed)) * 100}%` }} />
                       </div>
                       <span className="text-white text-xs font-mono w-16 text-right">{q.made}/{q.made + q.missed}</span>
                     </div>
@@ -180,7 +180,7 @@ export default function ShotDetection() {
 
             {/* Zone Breakdown */}
             {analytics.shotsByZone && (
-              <div className="bg-gray-900 border border-gray-700 rounded-xl p-4">
+              <div className="lakers-surface border border-[#76549a]/60 rounded-xl p-4">
                 <h3 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">Shot Zone Breakdown</h3>
                 <div className="space-y-3">
                   {Object.entries(analytics.shotsByZone).map(([zone, data]: [string, any]) => (
@@ -192,12 +192,12 @@ export default function ShotDetection() {
 
             {/* Key Patterns */}
             {analytics.keyPatterns?.length > 0 && (
-              <div className="bg-gray-900 border border-gray-700 rounded-xl p-4">
+              <div className="lakers-surface border border-[#76549a]/60 rounded-xl p-4">
                 <h3 className="text-white font-bold mb-3 text-sm uppercase tracking-wider">🔍 Key Patterns Detected</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {analytics.keyPatterns.map((pattern: string, i: number) => (
-                    <div key={i} className="flex items-start gap-2 bg-gray-800 rounded-lg p-3">
-                      <span className="text-orange-400 mt-0.5 shrink-0">→</span>
+                    <div key={i} className="flex items-start gap-2 bg-[#211037] rounded-lg p-3">
+                      <span className="text-[#FDB927] mt-0.5 shrink-0">→</span>
                       <span className="text-gray-300 text-sm">{pattern}</span>
                     </div>
                   ))}
@@ -226,4 +226,3 @@ export default function ShotDetection() {
     </DashboardLayout>
   );
 }
-
