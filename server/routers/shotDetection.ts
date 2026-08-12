@@ -3,7 +3,7 @@ import { protectedProcedure, router } from "../_core/trpc";
 import * as db from "../db";
 import { shotDetectionReports } from "../../drizzle/schema";
 import { eq, and } from "drizzle-orm";
-import { invokeLLM } from "../_core/llm";
+import { invokeJson } from "../aiJson";
 
 export const shotDetectionRouter = router({
   analyze: protectedProcedure
@@ -32,11 +32,7 @@ export const shotDetectionRouter = router({
 
       (async () => {
         try {
-          const response = await invokeLLM({
-            model: "gpt-5-mini",
-            messages: [{
-              role: "user",
-              content: `You are an advanced basketball analytics system with shot detection capabilities.
+          const analytics = await invokeJson(`You are an advanced basketball analytics system with shot detection capabilities.
 
 Analyze this game film and provide comprehensive shot detection analytics.
 Opponent: ${session.opponentName}
@@ -78,19 +74,23 @@ Return a JSON object:
   ],
   "topScorer": {"name": "inferred from report", "shots": 18, "made": 9, "pct": 50},
   "defenseRecommendation": "specific defensive strategy based on shot patterns"
-}`,
-            }],
-            response_format: { type: "json_object" },
-          });
-          const raw = response.choices[0]?.message?.content;
-          const analytics = JSON.parse(typeof raw === "string" ? raw : "{}");
+}`);
+
+          if (!analytics || typeof analytics !== "object" || typeof analytics.totalShots !== "number") {
+            throw new Error("AI returned incomplete shot analytics");
+          }
+
           await drizzle.update(shotDetectionReports)
             .set({ analyticsJson: JSON.stringify(analytics), status: "complete" })
             .where(eq(shotDetectionReports.id, reportId));
           await db.updateCoachProgress(ctx.user.id, { xp: 300 });
-        } catch {
+        } catch (err) {
+          console.error("[shotDetection.analyze] failed:", err);
           await drizzle.update(shotDetectionReports)
-            .set({ status: "error" })
+            .set({
+              status: "error",
+              analyticsJson: JSON.stringify({ __error: err instanceof Error ? err.message : String(err) }),
+            })
             .where(eq(shotDetectionReports.id, reportId));
         }
       })();
@@ -106,6 +106,17 @@ Return a JSON object:
       const [report] = await drizzle.select().from(shotDetectionReports)
         .where(and(eq(shotDetectionReports.sessionId, input.sessionId), eq(shotDetectionReports.userId, ctx.user.id)));
       if (!report) return null;
-      return { ...report, analytics: report.analyticsJson ? JSON.parse(report.analyticsJson) : null };
+      let analytics: any = null;
+      let errorMessage: string | null = null;
+      if (report.analyticsJson) {
+        try {
+          const parsed = JSON.parse(report.analyticsJson);
+          if (parsed && parsed.__error) errorMessage = String(parsed.__error);
+          else analytics = parsed;
+        } catch {
+          errorMessage = "Stored analytics were unreadable";
+        }
+      }
+      return { ...report, analytics, errorMessage };
     }),
 });

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 
 function ScoreRing({ score, label }: { score: number; label: string }) {
@@ -50,6 +51,7 @@ export default function FormCoach() {
 
   const analyzeMut = trpc.formCoach.analyze.useMutation({
     onSuccess: (data) => setAnalysisId(data.id),
+    onError: (e) => toast.error(e.message || "Could not start form analysis"),
   });
   const { data: analysis, isLoading } = trpc.formCoach.get.useQuery(
     { id: analysisId! },
@@ -233,9 +235,12 @@ export default function FormCoach() {
             <Button onClick={() => setAnalysisId(null)} variant="outline" className="border-gray-600 text-gray-300">← Analyze Another Player</Button>
           </div>
         ) : (
-          <div className="text-center py-12">
-            <p className="text-red-400">Analysis failed. Please try again.</p>
-            <Button onClick={() => setAnalysisId(null)} className="mt-4 bg-[#FDB927] text-[#2b1249] hover:bg-[#ffe08a]">Try Again</Button>
+          <div className="mx-auto max-w-xl lakers-surface border border-red-500/40 rounded-xl p-6 text-center">
+            <p className="text-red-300 font-bold mb-1">Form analysis failed</p>
+            <p className="text-sm text-purple-100/80">
+              {analysis?.errorMessage || "The analysis job did not finish. Try submitting the video again."}
+            </p>
+            <Button onClick={() => setAnalysisId(null)} className="gold-glow mt-4 bg-[#FDB927] text-[#2b1249] hover:bg-[#ffe08a] font-bold">Try Again</Button>
           </div>
         )}
       </div>

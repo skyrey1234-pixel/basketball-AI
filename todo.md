@@ -51,6 +51,17 @@ Basketball version of TacticalEdge AI (football scouting app), mirroring its str
 - [x] Shot Chart filtering by player and by linked game session, with filtered stats and heat map
 - [x] Vitest coverage for shot filtering logic and overlay export timestamp formatting (42 tests passing)
 
+## Bug Fix: Broken AI Features (Aug 2026)
+- [x] Diagnosed root cause: `response_format: { type: "json_object" }` rejected by model ("Web Search cannot be used with JSON mode" 400)
+- [x] Added `server/aiJson.ts` — safe JSON invocation + loose parsing (fence stripping, embedded JSON extraction, array coercion)
+- [x] Fixed Highlight Reel generation to use the working JSON strategy
+- [x] Fixed Shot Detection analytics to use the working JSON strategy
+- [x] Fixed Form Coach analysis to use the working JSON strategy
+- [x] Replaced silent `catch {}` blocks with persisted, user-visible error messages
+- [x] Added error UI states with Try Again on Highlight Reel, Shot Detection, and Form Coach
+- [x] Cleared stale failed rows from the database so features start clean
+- [x] Verified all three AI pipelines return real data live; 53 tests passing
+
 ## New Features (in progress)
 - [x] Full React Three Fiber 3D court play diagrams (replace flat SVG PlayCourtDiagram)
 - [x] Coach Style Mode — pick Pop/Stevens/Thibs/etc., AI generates game plan in their system

@@ -61,6 +61,7 @@ export default function HighlightReel() {
   const { data: sessions } = trpc.sessions.list.useQuery();
   const generateMut = trpc.highlightReel.generate.useMutation({
     onSuccess: (data) => setReelId(data.id),
+    onError: (e) => toast.error(e.message || "Could not start highlight reel generation"),
   });
   const { data: reel } = trpc.highlightReel.get.useQuery(
     { id: reelId! },
@@ -74,6 +75,8 @@ export default function HighlightReel() {
   const activeMoments = reel?.moments || existingReel?.moments || [];
   const isGenerating = reel?.status === "generating" || generateMut.isPending;
   const activeReelId = reel?.id ?? existingReel?.id ?? null;
+  const reelFailed = (reel?.status ?? existingReel?.status) === "error";
+  const reelError = reel?.errorMessage ?? existingReel?.errorMessage ?? null;
 
   const { data: exportPkg, isFetching: exportLoading } = trpc.highlightReel.exportPackage.useQuery(
     { id: activeReelId!, teamName: teamName.trim() || undefined, accentStyle },
@@ -177,6 +180,23 @@ export default function HighlightReel() {
             <div className="text-5xl mb-4 animate-pulse">🎬</div>
             <h2 className="text-white font-bold text-lg mb-2">Building Your Highlight Reel...</h2>
             <p className="text-gray-400 text-sm">AI is scanning the film for key moments, mistakes, and clutch plays</p>
+          </div>
+        )}
+
+        {/* Failure state */}
+        {!isGenerating && reelFailed && (
+          <div className="lakers-surface border border-red-500/40 rounded-xl p-5 mb-6">
+            <h2 className="text-red-300 font-bold mb-1">Highlight reel generation failed</h2>
+            <p className="text-sm text-purple-100/80">
+              {reelError || "The reel job did not finish. Try generating it again."}
+            </p>
+            <Button
+              size="sm"
+              onClick={() => selectedSession && generateMut.mutate({ sessionId: selectedSession })}
+              className="gold-glow mt-3 bg-[#FDB927] hover:bg-[#ffe08a] text-[#2b1249] font-bold"
+            >
+              Try Again
+            </Button>
           </div>
         )}
 

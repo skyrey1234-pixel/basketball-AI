@@ -2,6 +2,7 @@ import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 
 const ZONE_LABELS: Record<string, string> = {
@@ -28,7 +29,9 @@ export default function ShotDetection() {
   const [selectedSession, setSelectedSession] = useState<number | null>(null);
 
   const { data: sessions } = trpc.sessions.list.useQuery();
-  const analyzeMut = trpc.shotDetection.analyze.useMutation();
+  const analyzeMut = trpc.shotDetection.analyze.useMutation({
+    onError: e => toast.error(e.message || "Could not start shot detection"),
+  });
   const { data: report } = trpc.shotDetection.get.useQuery(
     { sessionId: selectedSession! },
     { enabled: !!selectedSession, refetchInterval: (q) => q.state.data?.status === "analyzing" ? 3000 : false }
@@ -36,6 +39,7 @@ export default function ShotDetection() {
 
   const analytics = report?.analytics;
   const isAnalyzing = report?.status === "analyzing" || analyzeMut.isPending;
+  const failed = report?.status === "error";
 
   return (
     <DashboardLayout>
@@ -92,6 +96,23 @@ export default function ShotDetection() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Failure state — surfaces the real reason instead of failing silently */}
+        {!isAnalyzing && failed && (
+          <div className="lakers-surface border border-red-500/40 rounded-xl p-5 mb-6">
+            <h2 className="text-red-300 font-bold mb-1">Shot detection failed</h2>
+            <p className="text-sm text-purple-100/80">
+              {report?.errorMessage || "The analysis job did not finish. Try running it again."}
+            </p>
+            <Button
+              size="sm"
+              onClick={() => analyzeMut.mutate({ sessionId: selectedSession! })}
+              className="gold-glow mt-3 bg-[#FDB927] hover:bg-[#ffe08a] text-[#2b1249] font-bold"
+            >
+              Try Again
+            </Button>
           </div>
         )}
 

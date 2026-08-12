@@ -3,7 +3,22 @@ import { protectedProcedure, router } from "../_core/trpc";
 import * as db from "../db";
 import { highlightReels } from "../../drizzle/schema";
 import { eq, and, desc } from "drizzle-orm";
-import { invokeLLM } from "../_core/llm";
+import { invokeJson, coerceArray } from "../aiJson";
+
+/** momentsJson holds either the moments array or an `{__error}` marker from a failed run. */
+function decodeMoments(raw: string | null): { moments: any[]; errorMessage: string | null } {
+  if (!raw) return { moments: [], errorMessage: null };
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return { moments: parsed, errorMessage: null };
+    if (parsed && typeof parsed === "object" && parsed.__error) {
+      return { moments: [], errorMessage: String(parsed.__error) };
+    }
+    return { moments: coerceArray(parsed, "moments"), errorMessage: null };
+  } catch {
+    return { moments: [], errorMessage: "Stored highlight data was unreadable" };
+  }
+}
 
 export const highlightReelRouter = router({
   generate: protectedProcedure
@@ -32,11 +47,7 @@ export const highlightReelRouter = router({
           const reportData = report?.highlights ? report.highlights as any : null;
           const highlights = Array.isArray(reportData) ? reportData : [];
 
-          const response = await invokeLLM({
-            model: "gpt-5-mini",
-            messages: [{
-              role: "user",
-              content: `You are a basketball film editor creating a highlight reel package for coaches.
+          const parsed = await invokeJson(`You are a basketball film editor creating a highlight reel package for coaches.
 
 Game: vs ${session.opponentName}
 Video: ${session.videoUrl || "uploaded film"}
@@ -46,8 +57,8 @@ Summary: ${report?.executiveSummary || ""}
 Identify the 8 most compelling moments for a coaching highlight reel.
 Focus on: key plays, mistakes to learn from, great defensive stops, clutch moments, teachable situations.
 
-Return a JSON array of 8 moments:
-[{
+Return a JSON object of this exact shape:
+{"moments":[{
   "timestamp": 45,
   "endTimestamp": 58,
   "label": "descriptive title",
@@ -55,19 +66,22 @@ Return a JSON array of 8 moments:
   "why": "why this moment matters",
   "coachingPoint": "what to say to the team about this clip",
   "duration": 13
-}]`,
-            }],
-            response_format: { type: "json_object" },
-          });
-          const raw = response.choices[0]?.message?.content;
-          const moments = JSON.parse(typeof raw === "string" ? raw : "[]");
+}]}`);
+
+          const moments = coerceArray(parsed, "moments", "highlights", "clips");
+          if (moments.length === 0) throw new Error("AI returned no highlight moments");
+
           await drizzle.update(highlightReels)
             .set({ momentsJson: JSON.stringify(moments), status: "complete" })
             .where(eq(highlightReels.id, reelId));
           await db.updateCoachProgress(ctx.user.id, { xp: 150 });
-        } catch {
+        } catch (err) {
+          console.error("[highlightReel.generate] failed:", err);
           await drizzle.update(highlightReels)
-            .set({ status: "error" })
+            .set({
+              status: "error",
+              momentsJson: JSON.stringify({ __error: err instanceof Error ? err.message : String(err) }),
+            })
             .where(eq(highlightReels.id, reelId));
         }
       })();
@@ -83,7 +97,7 @@ Return a JSON array of 8 moments:
       const [reel] = await drizzle.select().from(highlightReels)
         .where(and(eq(highlightReels.id, input.id), eq(highlightReels.userId, ctx.user.id)));
       if (!reel) throw new Error("Highlight reel not found");
-      return { ...reel, moments: reel.momentsJson ? JSON.parse(reel.momentsJson) : [] };
+      return { ...reel, ...decodeMoments(reel.momentsJson) };
     }),
 
   getBySession: protectedProcedure
@@ -95,7 +109,7 @@ Return a JSON array of 8 moments:
         .where(and(eq(highlightReels.sessionId, input.sessionId), eq(highlightReels.userId, ctx.user.id)))
         .orderBy(desc(highlightReels.createdAt));
       if (!reel) return null;
-      return { ...reel, moments: reel.momentsJson ? JSON.parse(reel.momentsJson) : [] };
+      return { ...reel, ...decodeMoments(reel.momentsJson) };
     }),
 
   list: protectedProcedure.query(async ({ ctx }) => {

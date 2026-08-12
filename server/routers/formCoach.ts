@@ -3,7 +3,7 @@ import { protectedProcedure, router } from "../_core/trpc";
 import * as db from "../db";
 import { formAnalyses } from "../../drizzle/schema";
 import { eq, and, desc } from "drizzle-orm";
-import { invokeLLM } from "../_core/llm";
+import { invokeJson } from "../aiJson";
 
 export const formCoachRouter = router({
   analyze: protectedProcedure
@@ -28,11 +28,7 @@ export const formCoachRouter = router({
 
       (async () => {
         try {
-          const response = await invokeLLM({
-            model: "gpt-5-mini",
-            messages: [{
-              role: "user",
-              content: `You are an elite basketball shooting coach with expertise in biomechanics.
+          const analysis = await invokeJson(`You are an elite basketball shooting coach with expertise in biomechanics.
 
 Analyze the shooting form of player: ${input.playerName}
 Video: ${input.videoUrl}
@@ -57,19 +53,23 @@ Return a JSON object:
   ],
   "coachQuote": "motivating quote from a legendary coach",
   "comparedTo": "NBA player with similar style or issues"
-}`,
-            }],
-            response_format: { type: "json_object" },
-          });
-          const raw = response.choices[0]?.message?.content;
-          const analysis = JSON.parse(typeof raw === "string" ? raw : "{}");
+}`);
+
+          if (!analysis || typeof analysis.overallScore !== "number") {
+            throw new Error("AI returned incomplete form analysis");
+          }
+
           await drizzle.update(formAnalyses)
             .set({ analysisJson: JSON.stringify(analysis), status: "complete" })
             .where(eq(formAnalyses.id, analysisId));
           await db.updateCoachProgress(ctx.user.id, { xp: 200 });
-        } catch {
+        } catch (err) {
+          console.error("[formCoach.analyze] failed:", err);
           await drizzle.update(formAnalyses)
-            .set({ status: "error" })
+            .set({
+              status: "error",
+              analysisJson: JSON.stringify({ __error: err instanceof Error ? err.message : String(err) }),
+            })
             .where(eq(formAnalyses.id, analysisId));
         }
       })();
@@ -85,7 +85,18 @@ Return a JSON object:
       const [analysis] = await drizzle.select().from(formAnalyses)
         .where(and(eq(formAnalyses.id, input.id), eq(formAnalyses.userId, ctx.user.id)));
       if (!analysis) throw new Error("Analysis not found");
-      return { ...analysis, analysisData: analysis.analysisJson ? JSON.parse(analysis.analysisJson) : null };
+      let analysisData: any = null;
+      let errorMessage: string | null = null;
+      if (analysis.analysisJson) {
+        try {
+          const parsed = JSON.parse(analysis.analysisJson);
+          if (parsed && parsed.__error) errorMessage = String(parsed.__error);
+          else analysisData = parsed;
+        } catch {
+          errorMessage = "Stored analysis was unreadable";
+        }
+      }
+      return { ...analysis, analysisData, errorMessage };
     }),
 
   list: protectedProcedure.query(async ({ ctx }) => {
